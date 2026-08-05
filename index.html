@@ -4,64 +4,61 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的台股監控儀表板</title>
+    <title>我的台股週 K 監控儀表板</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #333; }
-        .card { border-left: 5px solid #007bff; background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-        .card.w-bottom { border-left-color: #ffc107; background: #fff8e1; }
+        .card { border-left: 5px solid #ffc107; background: #fff8e1; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .price-info { color: #555; line-height: 1.6; }
         .highlight { color: #d9534f; font-weight: bold; }
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
+        .empty-msg { text-align: center; color: #888; padding: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📈 台股型態監控</h1>
+        <h1>📈 台股「週K線」W底潛力股</h1>
+        <p style="text-align:center; color:#666;">（已過濾，僅顯示成形標的）</p>
         
     <div class="card">
-        <div class="stock-title">2330-台積電</div>
-        <div class="price-info">
-            最新收盤價：2405.0<br>
-            近端支撐：2200.0<br>近端壓力：2425.0<br>
-        </div>
-    </div>
-    
-    <div class="card w-bottom">
-        <div class="stock-title">2317-鴻海</div>
-        <div class="price-info">
-            最新收盤價：258.5<br>
-            近端支撐：229.5<br>近端壓力：257.5<br><span class="highlight">⚠️ 疑似 W 底型態已成形！</span>
-        </div>
-    </div>
-    
-    <div class="card">
-        <div class="stock-title">2454-聯發科</div>
-        <div class="price-info">
-            最新收盤價：4000.0<br>
-            近端支撐：3150.0<br>近端壓力：3875.0<br>
-        </div>
-    </div>
-    
-    <div class="card">
-        <div class="stock-title">2308-台達電</div>
-        <div class="price-info">
-            最新收盤價：1650.0<br>
-            近端支撐：1495.0<br>近端壓力：1905.0<br>
-        </div>
-    </div>
-    
-    <div class="card w-bottom">
         <div class="stock-title">2881-富邦金</div>
         <div class="price-info">
-            最新收盤價：129.5<br>
-            近端支撐：123.0<br>近端壓力：128.5<br><span class="highlight">⚠️ 疑似 W 底型態已成形！</span>
+            最新週收盤價：129.5<br>
+            近端支撐：84.73<br>近端壓力：130.0<br>
+            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
         </div>
     </div>
     
-        <div class="footer">最後更新時間 (台灣時間)：2026-08-05 18:32:41</div>
+    <div class="card">
+        <div class="stock-title">2382-廣達</div>
+        <div class="price-info">
+            最新週收盤價：304.0<br>
+            近端支撐：291.5<br>近端壓力：361.56<br>
+            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="stock-title">2603-長榮</div>
+        <div class="price-info">
+            最新週收盤價：205.0<br>
+            近端支撐：181.0<br>近端壓力：206.0<br>
+            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="stock-title">2886-兆豐金</div>
+        <div class="price-info">
+            最新週收盤價：51.2<br>
+            近端支撐：39.1<br>近端壓力：53.1<br>
+            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+        </div>
+    </div>
+    
+        <div class="footer">最後更新時間 (台灣時間)：2026-08-05 18:39:07</div>
     </div>
 </body>
 </html>

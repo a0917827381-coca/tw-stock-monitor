@@ -3,6 +3,8 @@ import pandas as pd
 from scipy.signal import argrelextrema
 import numpy as np
 import datetime
+import requests
+import time
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -26,7 +28,7 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <h1>📈 台股「週K線」W底潛力股</h1>
-        <p style="text-align:center; color:#666;">（已過濾，僅顯示成形標的）</p>
+        <p style="text-align:center; color:#666;">（已自動掃描上市普通股，僅顯示成形標的）</p>
         {cards_html}
         <div class="footer">最後更新時間 (台灣時間)：{update_time}</div>
     </div>
@@ -34,17 +36,38 @@ HTML_TEMPLATE = """
 </html>
 """
 
+def get_twse_all_stocks():
+    """自動從證交所開放 API 抓取所有上市股票名單"""
+    url = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+    stock_dict = {}
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        for item in data:
+            code = item['Code']
+            name = item['Name']
+            # 過濾條件：只抓取長度為 4 碼的純數字代碼 (排除權證、ETF、特別股等)
+            if len(code) == 4 and code.isdigit():
+                stock_dict[f"{code}.TW"] = name
+        return stock_dict
+    except Exception as e:
+        print(f"抓取清單失敗: {e}")
+        return {}
+
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
-    # 變更為抓取過去 1 年的「週 K 線 (interval='1wk')」
     df = stock.history(period="1y", interval="1wk")
     
     if df.empty:
-        return "" # 如果沒抓到資料，直接回傳空字串 (不顯示)
+        return ""
     
     prices = df['Close'].values
     
-    # 週 K 的比較週期可以稍微縮短，這裡設為前後 3 週
+    # 這裡必須加一個防呆機制，避免剛上市不到 1 個月的股票因為資料太少而報錯
+    if len(prices) < 10:
+        return ""
+
     local_min_idx = argrelextrema(prices, np.less, order=3)[0]
     local_max_idx = argrelextrema(prices, np.greater, order=3)[0]
     
@@ -56,11 +79,9 @@ def analyze_stock(ticker, stock_name):
     if len(supports) >= 2:
         last_low = supports[-1]
         prev_low = supports[-2]
-        # 判斷 W 底：兩個低點相近，且目前股價已反彈
         if abs(last_low - prev_low) / prev_low < 0.05 and current_price > last_low:
             is_w_bottom = True
 
-    # 核心邏輯：如果「不是」W底，就直接結束，什麼都不印！
     if not is_w_bottom:
         return ""
 
@@ -81,26 +102,24 @@ def analyze_stock(ticker, stock_name):
     return card_html
 
 if __name__ == '__main__':
-    # 這裡以台灣 50 成分股的部分名單為例，避免被 Yahoo 封鎖
-    # 你可以自行擴充這個字典，建議總數控制在 100 檔以內
-    watch_list = {
-        '2330.TW': '台積電', '2317.TW': '鴻海', '2454.TW': '聯發科',
-        '2308.TW': '台達電', '2881.TW': '富邦金', '2891.TW': '中信金',
-        '2382.TW': '廣達', '2303.TW': '聯電', '2882.TW': '國泰金',
-        '3231.TW': '緯創', '2603.TW': '長榮', '2886.TW': '兆豐金'
-    }
+    # 1. 啟動時，先去證交所把一千多檔股票名單自動抓回來！
+    watch_list = get_twse_all_stocks()
+    
+    # ⚠️【重要防護機制】⚠️
+    # 雖然抓到了 1000 多檔，但為了避免被 Yahoo 瞬間封鎖 IP
+    # 我們在迴圈內強制加入 time.sleep(0.5) 讓機器人每查一檔就休息半秒
+    watch_items = list(watch_list.items())
     
     all_cards = ""
-    for ticker, name in watch_list.items():
-        # 加上 try-except 防止單一股票抓取失敗導致整個程式崩潰
+    for ticker, name in watch_items:
         try:
             all_cards += analyze_stock(ticker, name)
+            time.sleep(0.5) # 這是掃描全市場必須付出的時間代價
         except:
             continue
     
-    # 如果全市場今天都沒有 W 底，給一個提示訊息
     if all_cards == "":
-        all_cards = '<div class="empty-msg">目前監控名單中，無任何股票符合週 K 線 W 底型態。持續等待機會！</div>'
+        all_cards = '<div class="empty-msg">目前上市普通股中，無任何股票符合週 K 線 W 底型態。持續等待機會！</div>'
         
     tw_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
     final_html = HTML_TEMPLATE.replace('{cards_html}', all_cards).replace('{update_time}', tw_time)

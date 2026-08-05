@@ -8,11 +8,21 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; }
-        .card { border-left: 5px solid #ffc107; background: #fff8e1; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        h1 { text-align: center; color: #333; font-size: 1.5em; }
+        
+        /* 篩選器介面設計 */
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filters input, .filters select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; flex: 1; min-width: 140px; }
+        
+        /* 卡片設計與顏色區分 */
+        .card { border-left: 5px solid #ccc; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 5px; display: block; }
+        .card.w-forming { border-left-color: #ffc107; background: #fff8e1; } /* 黃色：快成形 */
+        .card.w-formed { border-left-color: #28a745; background: #e8f5e9; } /* 綠色：已成形 */
+        
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .price-info { color: #555; line-height: 1.6; }
-        .highlight { color: #d9534f; font-weight: bold; }
+        .tag-forming { color: #d9534f; font-weight: bold; }
+        .tag-formed { color: #28a745; font-weight: bold; }
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
         .empty-msg { text-align: center; color: #888; padding: 20px; }
     </style>
@@ -20,3402 +30,3439 @@
 <body>
     <div class="container">
         <h1>📈 台股「週K線」W底潛力股</h1>
-        <p style="text-align:center; color:#666;">（已自動掃描上市普通股，僅顯示成形標的）</p>
         
-    <div class="card">
+        <!-- 搜尋與篩選器 -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="🔍 輸入代碼或名稱 (如: 台積電)" onkeyup="filterCards()">
+            <select id="statusFilter" onchange="filterCards()">
+                <option value="all">📊 顯示全部型態</option>
+                <option value="formed">🚀 只看【已成形】(突破頸線)</option>
+                <option value="forming">⚠️ 只看【快成形】(右腳反彈)</option>
+            </select>
+        </div>
+
+        <div id="cardContainer">
+            
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">0055-元大MSCI金融</div>
         <div class="price-info">
             最新週收盤價：44.41<br>
-            近端支撐：32.28<br>近端壓力：44.69<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：34.78<br>右腳支撐：32.28<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">0061-元大寶滬深</div>
         <div class="price-info">
             最新週收盤價：24.94<br>
-            近端支撐：24.06<br>近端壓力：25.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.5<br>右腳支撐：24.06<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1101-台泥</div>
         <div class="price-info">
             最新週收盤價：24.05<br>
-            近端支撐：22.7<br>近端壓力：24.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：24.56<br>右腳支撐：22.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1102-亞泥</div>
         <div class="price-info">
             最新週收盤價：32.6<br>
-            近端支撐：31.75<br>近端壓力：34.04<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.53<br>右腳支撐：31.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1103-嘉泥</div>
         <div class="price-info">
             最新週收盤價：13.0<br>
-            近端支撐：12.45<br>近端壓力：13.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.46<br>右腳支撐：12.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1110-東泥</div>
         <div class="price-info">
             最新週收盤價：15.9<br>
-            近端支撐：14.62<br>近端壓力：16.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.7<br>右腳支撐：14.62<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1203-味王</div>
         <div class="price-info">
             最新週收盤價：47.8<br>
-            近端支撐：42.5<br>近端壓力：48.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：43.55<br>右腳支撐：42.5<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1210-大成</div>
         <div class="price-info">
             最新週收盤價：55.0<br>
-            近端支撐：52.4<br>近端壓力：58.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：54.7<br>右腳支撐：52.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1216-統一</div>
         <div class="price-info">
             最新週收盤價：73.2<br>
-            近端支撐：66.64<br>近端壓力：76.93<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：70.68<br>右腳支撐：66.64<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1217-愛之味</div>
         <div class="price-info">
             最新週收盤價：9.83<br>
-            近端支撐：9.76<br>近端壓力：10.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：9.92<br>右腳支撐：9.76<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1227-佳格</div>
         <div class="price-info">
             最新週收盤價：28.7<br>
-            近端支撐：26.7<br>近端壓力：29.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.37<br>右腳支撐：26.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1231-聯華食</div>
         <div class="price-info">
             最新週收盤價：80.1<br>
-            近端支撐：77.11<br>近端壓力：82.02<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：82.82<br>右腳支撐：77.11<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1232-大統益</div>
         <div class="price-info">
             最新週收盤價：152.5<br>
-            近端支撐：141.0<br>近端壓力：168.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：144.25<br>右腳支撐：141.0<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1233-天仁</div>
         <div class="price-info">
             最新週收盤價：28.7<br>
-            近端支撐：27.71<br>近端壓力：29.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.01<br>右腳支撐：27.71<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1234-黑松</div>
         <div class="price-info">
             最新週收盤價：33.55<br>
-            近端支撐：33.15<br>近端壓力：33.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.54<br>右腳支撐：33.15<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1236-宏亞</div>
         <div class="price-info">
             最新週收盤價：24.85<br>
-            近端支撐：22.49<br>近端壓力：25.21<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：26.01<br>右腳支撐：22.49<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1308-亞聚</div>
         <div class="price-info">
             最新週收盤價：13.0<br>
-            近端支撐：12.55<br>近端壓力：15.63<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.63<br>右腳支撐：12.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1313-聯成</div>
         <div class="price-info">
             最新週收盤價：11.0<br>
-            近端支撐：10.35<br>近端壓力：14.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.3<br>右腳支撐：10.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1315-達新</div>
         <div class="price-info">
             最新週收盤價：63.3<br>
-            近端支撐：60.5<br>近端壓力：64.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：62.82<br>右腳支撐：60.5<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1316-上曜</div>
         <div class="price-info">
             最新週收盤價：9.96<br>
-            近端支撐：9.95<br>近端壓力：11.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.3<br>右腳支撐：9.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1319-東陽</div>
         <div class="price-info">
             最新週收盤價：72.9<br>
-            近端支撐：71.2<br>近端壓力：94.48<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：94.48<br>右腳支撐：71.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1337-再生-KY</div>
         <div class="price-info">
             最新週收盤價：4.71<br>
-            近端支撐：4.66<br>近端壓力：5.61<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：5.61<br>右腳支撐：4.66<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1339-昭輝</div>
         <div class="price-info">
             最新週收盤價：44.45<br>
-            近端支撐：39.7<br>近端壓力：44.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.7<br>右腳支撐：39.7<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1341-富林-KY</div>
         <div class="price-info">
             最新週收盤價：59.4<br>
-            近端支撐：57.5<br>近端壓力：59.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：59.4<br>右腳支撐：57.5<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1416-廣豐</div>
         <div class="price-info">
             最新週收盤價：10.85<br>
-            近端支撐：10.75<br>近端壓力：11.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.2<br>右腳支撐：10.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1417-嘉裕</div>
         <div class="price-info">
             最新週收盤價：8.3<br>
-            近端支撐：8.22<br>近端壓力：8.86<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：8.86<br>右腳支撐：8.22<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1418-東華</div>
         <div class="price-info">
             最新週收盤價：18.3<br>
-            近端支撐：18.25<br>近端壓力：19.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.2<br>右腳支撐：18.25<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1419-新紡</div>
         <div class="price-info">
             最新週收盤價：65.6<br>
-            近端支撐：62.6<br>近端壓力：67.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：65.06<br>右腳支撐：60.88<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1432-大魯閣</div>
         <div class="price-info">
             最新週收盤價：15.1<br>
-            近端支撐：14.95<br>近端壓力：15.64<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.64<br>右腳支撐：14.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1438-三地開發</div>
         <div class="price-info">
             最新週收盤價：22.55<br>
-            近端支撐：20.95<br>近端壓力：23.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：24.05<br>右腳支撐：20.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1440-南紡</div>
         <div class="price-info">
             最新週收盤價：12.3<br>
-            近端支撐：12.15<br>近端壓力：14.13<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.13<br>右腳支撐：12.15<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1443-立益物流</div>
         <div class="price-info">
             最新週收盤價：25.75<br>
-            近端支撐：25.65<br>近端壓力：27.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：27.9<br>右腳支撐：25.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1446-宏和</div>
         <div class="price-info">
             最新週收盤價：13.8<br>
-            近端支撐：13.7<br>近端壓力：16.16<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.16<br>右腳支撐：13.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1449-佳和</div>
         <div class="price-info">
             最新週收盤價：12.5<br>
-            近端支撐：12.1<br>近端壓力：14.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.55<br>右腳支撐：12.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1451-年興</div>
         <div class="price-info">
             最新週收盤價：17.6<br>
-            近端支撐：16.55<br>近端壓力：17.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：17.1<br>右腳支撐：16.55<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1452-宏益</div>
         <div class="price-info">
             最新週收盤價：11.15<br>
-            近端支撐：10.6<br>近端壓力：11.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.95<br>右腳支撐：10.6<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1453-大將</div>
         <div class="price-info">
             最新週收盤價：11.15<br>
-            近端支撐：11.1<br>近端壓力：11.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.8<br>右腳支撐：11.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1454-台富</div>
         <div class="price-info">
             最新週收盤價：12.95<br>
-            近端支撐：12.55<br>近端壓力：14.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.2<br>右腳支撐：12.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1457-宜進</div>
         <div class="price-info">
             最新週收盤價：14.25<br>
-            近端支撐：14.05<br>近端壓力：14.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.5<br>右腳支撐：14.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1463-強盛新</div>
         <div class="price-info">
             最新週收盤價：17.7<br>
-            近端支撐：17.45<br>近端壓力：18.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.9<br>右腳支撐：17.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1467-南緯</div>
         <div class="price-info">
             最新週收盤價：9.97<br>
-            近端支撐：7.0<br>近端壓力：10.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：7.71<br>右腳支撐：7.0<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1468-昶和</div>
         <div class="price-info">
             最新週收盤價：13.85<br>
-            近端支撐：11.85<br>近端壓力：14.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.45<br>右腳支撐：11.85<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1470-大統新創</div>
         <div class="price-info">
             最新週收盤價：22.9<br>
-            近端支撐：21.0<br>近端壓力：23.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.15<br>右腳支撐：21.0<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1472-三洋實業</div>
         <div class="price-info">
             最新週收盤價：88.0<br>
-            近端支撐：83.38<br>近端壓力：89.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：90.38<br>右腳支撐：83.38<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1474-弘裕</div>
         <div class="price-info">
             最新週收盤價：9.96<br>
-            近端支撐：9.95<br>近端壓力：11.07<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.07<br>右腳支撐：9.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1476-儒鴻</div>
         <div class="price-info">
             最新週收盤價：355.0<br>
-            近端支撐：315.5<br>近端壓力：339.98<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：339.98<br>右腳支撐：315.5<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1477-聚陽</div>
         <div class="price-info">
             最新週收盤價：225.0<br>
-            近端支撐：215.0<br>近端壓力：228.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：228.5<br>右腳支撐：215.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1506-正道</div>
         <div class="price-info">
             最新週收盤價：10.3<br>
-            近端支撐：9.99<br>近端壓力：11.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.95<br>右腳支撐：9.99<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1514-亞力</div>
         <div class="price-info">
             最新週收盤價：101.5<br>
-            近端支撐：97.6<br>近端壓力：118.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：129.62<br>右腳支撐：97.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1522-堤維西</div>
         <div class="price-info">
             最新週收盤價：28.2<br>
-            近端支撐：27.85<br>近端壓力：33.17<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.38<br>右腳支撐：27.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1525-江申</div>
         <div class="price-info">
             最新週收盤價：68.8<br>
-            近端支撐：57.16<br>近端壓力：66.64<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：61.09<br>右腳支撐：57.16<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1526-日馳</div>
         <div class="price-info">
             最新週收盤價：17.45<br>
-            近端支撐：13.9<br>近端壓力：18.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.25<br>右腳支撐：13.9<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1527-鑽全</div>
         <div class="price-info">
             最新週收盤價：32.5<br>
-            近端支撐：31.72<br>近端壓力：32.68<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.92<br>右腳支撐：31.72<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1536-和大</div>
         <div class="price-info">
             最新週收盤價：51.6<br>
-            近端支撐：46.65<br>近端壓力：55.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：55.0<br>右腳支撐：46.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1537-廣隆</div>
         <div class="price-info">
             最新週收盤價：125.5<br>
-            近端支撐：123.0<br>近端壓力：127.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：125.5<br>右腳支撐：123.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1539-巨庭</div>
         <div class="price-info">
             最新週收盤價：16.1<br>
-            近端支撐：15.5<br>近端壓力：16.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.55<br>右腳支撐：15.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1540-喬福</div>
         <div class="price-info">
             最新週收盤價：20.35<br>
-            近端支撐：19.4<br>近端壓力：21.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：21.7<br>右腳支撐：19.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1541-錩泰</div>
         <div class="price-info">
             最新週收盤價：21.5<br>
-            近端支撐：21.4<br>近端壓力：22.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.35<br>右腳支撐：21.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1558-伸興</div>
         <div class="price-info">
             最新週收盤價：91.0<br>
-            近端支撐：85.19<br>近端壓力：91.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：86.9<br>右腳支撐：85.19<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1560-中砂</div>
         <div class="price-info">
             最新週收盤價：680.0<br>
-            近端支撐：640.0<br>近端壓力：750.96<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：750.96<br>右腳支撐：640.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1590-亞德客-KY</div>
         <div class="price-info">
             最新週收盤價：1510.0<br>
-            近端支撐：1239.25<br>近端壓力：1474.37<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：1410.69<br>右腳支撐：1239.25<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1598-岱宇</div>
         <div class="price-info">
             最新週收盤價：20.15<br>
-            近端支撐：18.7<br>近端壓力：20.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：21.63<br>右腳支撐：18.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1603-華電</div>
         <div class="price-info">
             最新週收盤價：28.95<br>
-            近端支撐：28.55<br>近端壓力：30.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：30.83<br>右腳支撐：28.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1604-聲寶</div>
         <div class="price-info">
             最新週收盤價：23.05<br>
-            近端支撐：23.05<br>近端壓力：23.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.5<br>右腳支撐：23.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1608-華榮</div>
         <div class="price-info">
             最新週收盤價：33.4<br>
-            近端支撐：29.35<br>近端壓力：32.61<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.83<br>右腳支撐：29.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1609-大亞</div>
         <div class="price-info">
             最新週收盤價：35.8<br>
-            近端支撐：33.85<br>近端壓力：39.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：39.8<br>右腳支撐：33.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1612-宏泰</div>
         <div class="price-info">
             最新週收盤價：30.75<br>
-            近端支撐：30.4<br>近端壓力：36.84<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：36.84<br>右腳支撐：30.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1614-三洋電</div>
         <div class="price-info">
             最新週收盤價：31.05<br>
-            近端支撐：30.46<br>近端壓力：31.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.97<br>右腳支撐：30.46<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1615-大山</div>
         <div class="price-info">
             最新週收盤價：42.05<br>
-            近端支撐：42.0<br>近端壓力：44.29<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：44.29<br>右腳支撐：42.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1616-億泰</div>
         <div class="price-info">
             最新週收盤價：19.5<br>
-            近端支撐：18.55<br>近端壓力：22.03<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.03<br>右腳支撐：18.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1618-合機</div>
         <div class="price-info">
             最新週收盤價：38.5<br>
-            近端支撐：37.35<br>近端壓力：42.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.2<br>右腳支撐：37.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1702-南僑</div>
         <div class="price-info">
             最新週收盤價：33.3<br>
-            近端支撐：31.25<br>近端壓力：33.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.8<br>右腳支撐：31.25<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1713-國化</div>
         <div class="price-info">
             最新週收盤價：46.95<br>
-            近端支撐：46.1<br>近端壓力：50.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：46.89<br>右腳支撐：43.06<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1717-長興</div>
         <div class="price-info">
             最新週收盤價：66.5<br>
-            近端支撐：59.9<br>近端壓力：81.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：83.0<br>右腳支撐：59.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1720-生達</div>
         <div class="price-info">
             最新週收盤價：56.6<br>
-            近端支撐：53.45<br>近端壓力：56.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：56.08<br>右腳支撐：53.45<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1722-台肥</div>
         <div class="price-info">
             最新週收盤價：45.3<br>
-            近端支撐：44.4<br>近端壓力：48.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：47.5<br>右腳支撐：44.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1723-中碳</div>
         <div class="price-info">
             最新週收盤價：83.7<br>
-            近端支撐：81.3<br>近端壓力：88.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：88.2<br>右腳支撐：81.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1725-元禎</div>
         <div class="price-info">
             最新週收盤價：29.6<br>
-            近端支撐：29.1<br>近端壓力：36.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：36.3<br>右腳支撐：29.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1726-永記</div>
         <div class="price-info">
             最新週收盤價：77.0<br>
-            近端支撐：71.54<br>近端壓力：78.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：74.21<br>右腳支撐：71.54<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1730-花仙子</div>
         <div class="price-info">
             最新週收盤價：51.2<br>
-            近端支撐：49.64<br>近端壓力：51.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：50.58<br>右腳支撐：49.64<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1731-美吾華</div>
         <div class="price-info">
             最新週收盤價：20.5<br>
-            近端支撐：20.16<br>近端壓力：20.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.63<br>右腳支撐：20.16<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1732-毛寶</div>
         <div class="price-info">
             最新週收盤價：26.95<br>
-            近端支撐：26.3<br>近端壓力：28.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.0<br>右腳支撐：26.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1734-杏輝</div>
         <div class="price-info">
             最新週收盤價：31.7<br>
-            近端支撐：27.93<br>近端壓力：29.34<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.34<br>右腳支撐：27.93<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1737-臺鹽</div>
         <div class="price-info">
             最新週收盤價：31.95<br>
-            近端支撐：31.45<br>近端壓力：32.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：32.2<br>右腳支撐：31.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1752-南光</div>
         <div class="price-info">
             最新週收盤價：31.55<br>
-            近端支撐：31.03<br>近端壓力：32.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：32.08<br>右腳支撐：31.03<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1760-寶齡富錦</div>
         <div class="price-info">
             最新週收盤價：59.6<br>
-            近端支撐：58.6<br>近端壓力：63.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：63.0<br>右腳支撐：58.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1776-展宇</div>
         <div class="price-info">
             最新週收盤價：16.7<br>
-            近端支撐：14.45<br>近端壓力：20.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.79<br>右腳支撐：14.45<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1783-和康生</div>
         <div class="price-info">
             最新週收盤價：40.5<br>
-            近端支撐：39.85<br>近端壓力：40.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：40.35<br>右腳支撐：39.85<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1795-美時</div>
         <div class="price-info">
             最新週收盤價：190.0<br>
-            近端支撐：175.0<br>近端壓力：204.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：204.0<br>右腳支撐：175.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1806-冠軍</div>
         <div class="price-info">
             最新週收盤價：7.97<br>
-            近端支撐：7.92<br>近端壓力：8.36<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：8.07<br>右腳支撐：7.92<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1817-凱撒衛</div>
         <div class="price-info">
             最新週收盤價：38.25<br>
-            近端支撐：36.39<br>近端壓力：38.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：36.86<br>右腳支撐：36.39<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1903-士紙</div>
         <div class="price-info">
             最新週收盤價：46.85<br>
-            近端支撐：46.45<br>近端壓力：50.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：49.2<br>右腳支撐：46.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1904-正隆</div>
         <div class="price-info">
             最新週收盤價：21.25<br>
-            近端支撐：20.95<br>近端壓力：23.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.4<br>右腳支撐：20.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">1907-永豐餘</div>
         <div class="price-info">
             最新週收盤價：29.75<br>
-            近端支撐：22.75<br>近端壓力：27.18<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.3<br>右腳支撐：22.75<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">1909-榮成</div>
         <div class="price-info">
             最新週收盤價：9.99<br>
-            近端支撐：9.85<br>近端壓力：10.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.3<br>右腳支撐：9.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2002-中鋼</div>
         <div class="price-info">
             最新週收盤價：18.9<br>
-            近端支撐：18.4<br>近端壓力：19.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.94<br>右腳支撐：18.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2010-春源</div>
         <div class="price-info">
             最新週收盤價：21.1<br>
-            近端支撐：20.9<br>近端壓力：22.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.75<br>右腳支撐：20.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2013-中鋼構</div>
         <div class="price-info">
             最新週收盤價：40.5<br>
-            近端支撐：39.61<br>近端壓力：41.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.4<br>右腳支撐：39.61<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2014-中鴻</div>
         <div class="price-info">
             最新週收盤價：16.85<br>
-            近端支撐：16.6<br>近端壓力：18.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.75<br>右腳支撐：16.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2015-豐興</div>
         <div class="price-info">
             最新週收盤價：63.5<br>
-            近端支撐：60.2<br>近端壓力：65.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：65.47<br>右腳支撐：60.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2017-官田鋼</div>
         <div class="price-info">
             最新週收盤價：8.65<br>
-            近端支撐：8.5<br>近端壓力：9.68<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.85<br>右腳支撐：8.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2023-燁輝</div>
         <div class="price-info">
             最新週收盤價：13.65<br>
-            近端支撐：13.6<br>近端壓力：13.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.95<br>右腳支撐：13.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2025-千興</div>
         <div class="price-info">
             最新週收盤價：11.9<br>
-            近端支撐：11.55<br>近端壓力：12.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.1<br>右腳支撐：11.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2029-盛餘</div>
         <div class="price-info">
             最新週收盤價：20.3<br>
-            近端支撐：19.96<br>近端壓力：20.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.59<br>右腳支撐：19.96<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2032-新鋼</div>
         <div class="price-info">
             最新週收盤價：15.65<br>
-            近端支撐：15.55<br>近端壓力：18.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.3<br>右腳支撐：15.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2033-佳大</div>
         <div class="price-info">
             最新週收盤價：16.0<br>
-            近端支撐：14.6<br>近端壓力：16.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.55<br>右腳支撐：14.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2034-允強</div>
         <div class="price-info">
             最新週收盤價：18.95<br>
-            近端支撐：18.4<br>近端壓力：19.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.6<br>右腳支撐：18.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2049-上銀</div>
         <div class="price-info">
             最新週收盤價：365.0<br>
-            近端支撐：304.5<br>近端壓力：347.97<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：347.97<br>右腳支撐：304.5<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2062-橋椿</div>
         <div class="price-info">
             最新週收盤價：18.8<br>
-            近端支撐：18.7<br>近端壓力：19.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.3<br>右腳支撐：18.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2069-運錩</div>
         <div class="price-info">
             最新週收盤價：18.5<br>
-            近端支撐：18.15<br>近端壓力：18.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.34<br>右腳支撐：18.15<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2102-泰豐</div>
         <div class="price-info">
             最新週收盤價：18.95<br>
-            近端支撐：17.9<br>近端壓力：19.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.35<br>右腳支撐：17.9<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2103-台橡</div>
         <div class="price-info">
             最新週收盤價：22.4<br>
-            近端支撐：21.25<br>近端壓力：21.42<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.5<br>右腳支撐：21.25<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2104-國際中橡</div>
         <div class="price-info">
             最新週收盤價：9.77<br>
-            近端支撐：9.65<br>近端壓力：11.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.2<br>右腳支撐：9.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2105-正新</div>
         <div class="price-info">
             最新週收盤價：30.5<br>
-            近端支撐：30.45<br>近端壓力：33.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.6<br>右腳支撐：30.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2107-厚生</div>
         <div class="price-info">
             最新週收盤價：25.4<br>
-            近端支撐：23.68<br>近端壓力：25.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：24.48<br>右腳支撐：23.68<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2109-華豐</div>
         <div class="price-info">
             最新週收盤價：14.4<br>
-            近端支撐：14.26<br>近端壓力：14.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.13<br>右腳支撐：14.26<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2114-鑫永銓</div>
         <div class="price-info">
             最新週收盤價：87.2<br>
-            近端支撐：83.48<br>近端壓力：90.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：84.14<br>右腳支撐：83.48<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2201-裕隆</div>
         <div class="price-info">
             最新週收盤價：27.35<br>
-            近端支撐：26.8<br>近端壓力：28.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.7<br>右腳支撐：26.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2207-和泰車</div>
         <div class="price-info">
             最新週收盤價：509.0<br>
-            近端支撐：443.12<br>近端壓力：558.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：493.96<br>右腳支撐：443.12<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2227-裕日車</div>
         <div class="price-info">
             最新週收盤價：50.0<br>
-            近端支撐：48.75<br>近端壓力：50.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：50.4<br>右腳支撐：48.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2236-百達-KY</div>
         <div class="price-info">
             最新週收盤價：138.0<br>
-            近端支撐：130.5<br>近端壓力：184.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：184.0<br>右腳支撐：130.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2248-華勝-KY</div>
         <div class="price-info">
             最新週收盤價：57.9<br>
-            近端支撐：51.82<br>近端壓力：62.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：54.47<br>右腳支撐：51.82<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2254-巨鎧精密-創</div>
         <div class="price-info">
             最新週收盤價：61.0<br>
-            近端支撐：58.6<br>近端壓力：61.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：70.9<br>右腳支撐：58.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2258-鴻華先進-創</div>
         <div class="price-info">
             最新週收盤價：30.0<br>
-            近端支撐：27.4<br>近端壓力：33.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.4<br>右腳支撐：27.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2323-中環</div>
         <div class="price-info">
             最新週收盤價：10.3<br>
-            近端支撐：9.94<br>近端壓力：12.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.0<br>右腳支撐：9.94<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2331-精英</div>
         <div class="price-info">
             最新週收盤價：19.55<br>
-            近端支撐：18.4<br>近端壓力：22.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.7<br>右腳支撐：18.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2348-海悅</div>
         <div class="price-info">
             最新週收盤價：68.8<br>
-            近端支撐：62.14<br>近端壓力：69.22<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：67.98<br>右腳支撐：62.14<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2352-佳世達</div>
         <div class="price-info">
             最新週收盤價：28.45<br>
-            近端支撐：27.35<br>近端壓力：31.91<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.91<br>右腳支撐：27.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2359-所羅門</div>
         <div class="price-info">
             最新週收盤價：145.0<br>
-            近端支撐：121.0<br>近端壓力：141.97<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：145.0<br>右腳支撐：121.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2364-倫飛</div>
         <div class="price-info">
             最新週收盤價：70.6<br>
-            近端支撐：64.6<br>近端壓力：71.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：76.1<br>右腳支撐：64.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2380-虹光</div>
         <div class="price-info">
             最新週收盤價：19.0<br>
-            近端支撐：18.8<br>近端壓力：23.14<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.86<br>右腳支撐：18.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2382-廣達</div>
         <div class="price-info">
             最新週收盤價：304.0<br>
-            近端支撐：291.5<br>近端壓力：361.56<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：374.51<br>右腳支撐：291.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2387-精元</div>
         <div class="price-info">
             最新週收盤價：37.85<br>
-            近端支撐：37.7<br>近端壓力：41.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.45<br>右腳支撐：37.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2388-威盛</div>
         <div class="price-info">
             最新週收盤價：83.0<br>
-            近端支撐：65.9<br>近端壓力：81.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：81.35<br>右腳支撐：65.9<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2392-正崴</div>
         <div class="price-info">
             最新週收盤價：37.0<br>
-            近端支撐：33.6<br>近端壓力：39.56<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：39.56<br>右腳支撐：33.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2393-億光</div>
         <div class="price-info">
             最新週收盤價：60.7<br>
-            近端支撐：57.93<br>近端壓力：65.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：68.31<br>右腳支撐：57.93<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2397-友通</div>
         <div class="price-info">
             最新週收盤價：62.1<br>
-            近端支撐：53.7<br>近端壓力：61.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：61.1<br>右腳支撐：53.7<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2425-承啟</div>
         <div class="price-info">
             最新週收盤價：49.1<br>
-            近端支撐：25.94<br>近端壓力：31.62<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：30.58<br>右腳支撐：25.94<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2427-三商電</div>
         <div class="price-info">
             最新週收盤價：22.4<br>
-            近端支撐：21.72<br>近端壓力：25.84<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.84<br>右腳支撐：21.72<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2431-聯昌</div>
         <div class="price-info">
             最新週收盤價：10.4<br>
-            近端支撐：10.05<br>近端壓力：12.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.05<br>右腳支撐：10.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2432-倚天酷碁-創</div>
         <div class="price-info">
             最新週收盤價：28.5<br>
-            近端支撐：24.81<br>近端壓力：28.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：27.17<br>右腳支撐：24.81<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2433-互盛電</div>
         <div class="price-info">
             最新週收盤價：41.75<br>
-            近端支撐：40.78<br>近端壓力：43.23<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：43.23<br>右腳支撐：40.78<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2439-美律</div>
         <div class="price-info">
             最新週收盤價：81.4<br>
-            近端支撐：80.2<br>近端壓力：92.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：92.4<br>右腳支撐：80.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2440-太空梭</div>
         <div class="price-info">
             最新週收盤價：15.25<br>
-            近端支撐：14.15<br>近端壓力：18.45<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.9<br>右腳支撐：14.15<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2450-神腦</div>
         <div class="price-info">
             最新週收盤價：28.45<br>
-            近端支撐：27.74<br>近端壓力：29.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.74<br>右腳支撐：27.74<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2451-創見</div>
         <div class="price-info">
             最新週收盤價：282.5<br>
-            近端支撐：230.0<br>近端壓力：293.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：324.45<br>右腳支撐：230.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2453-凌群</div>
         <div class="price-info">
             最新週收盤價：53.7<br>
-            近端支撐：51.1<br>近端壓力：54.57<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：57.99<br>右腳支撐：51.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2458-義隆</div>
         <div class="price-info">
             最新週收盤價：160.5<br>
-            近端支撐：151.0<br>近端壓力：184.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：184.0<br>右腳支撐：151.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2459-敦吉</div>
         <div class="price-info">
             最新週收盤價：64.3<br>
-            近端支撐：63.3<br>近端壓力：65.06<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：65.06<br>右腳支撐：63.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2460-建通</div>
         <div class="price-info">
             最新週收盤價：31.65<br>
-            近端支撐：30.3<br>近端壓力：38.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：38.75<br>右腳支撐：30.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2461-光群雷</div>
         <div class="price-info">
             最新週收盤價：16.9<br>
-            近端支撐：15.9<br>近端壓力：19.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.5<br>右腳支撐：15.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2465-麗臺</div>
         <div class="price-info">
             最新週收盤價：85.8<br>
-            近端支撐：73.4<br>近端壓力：89.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：89.5<br>右腳支撐：73.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2471-資通</div>
         <div class="price-info">
             最新週收盤價：49.0<br>
-            近端支撐：48.1<br>近端壓力：50.47<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：50.47<br>右腳支撐：48.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2474-可成</div>
         <div class="price-info">
             最新週收盤價：181.5<br>
-            近端支撐：178.64<br>近端壓力：199.89<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：215.82<br>右腳支撐：178.64<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2476-鉅祥</div>
         <div class="price-info">
             最新週收盤價：124.5<br>
-            近端支撐：113.5<br>近端壓力：133.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：133.0<br>右腳支撐：113.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2477-美隆電</div>
         <div class="price-info">
             最新週收盤價：21.55<br>
-            近端支撐：20.95<br>近端壓力：21.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.35<br>右腳支撐：20.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2480-敦陽科</div>
         <div class="price-info">
             最新週收盤價：153.0<br>
-            近端支撐：132.07<br>近端壓力：166.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：139.67<br>右腳支撐：132.07<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2482-連宇</div>
         <div class="price-info">
             最新週收盤價：16.5<br>
-            近端支撐：16.1<br>近端壓力：18.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.0<br>右腳支撐：16.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2495-普安</div>
         <div class="price-info">
             最新週收盤價：38.3<br>
-            近端支撐：34.55<br>近端壓力：51.42<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：51.42<br>右腳支撐：34.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2505-國揚</div>
         <div class="price-info">
             最新週收盤價：17.7<br>
-            近端支撐：17.6<br>近端壓力：19.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.8<br>右腳支撐：17.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2515-中工</div>
         <div class="price-info">
             最新週收盤價：11.9<br>
-            近端支撐：11.85<br>近端壓力：13.62<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.62<br>右腳支撐：11.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2520-冠德</div>
         <div class="price-info">
             最新週收盤價：34.3<br>
-            近端支撐：29.85<br>近端壓力：35.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：30.9<br>右腳支撐：29.85<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2528-皇普</div>
         <div class="price-info">
             最新週收盤價：20.1<br>
-            近端支撐：18.17<br>近端壓力：19.83<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.3<br>右腳支撐：18.17<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2530-華建</div>
         <div class="price-info">
             最新週收盤價：19.6<br>
-            近端支撐：18.45<br>近端壓力：20.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.0<br>右腳支撐：18.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2534-宏盛</div>
         <div class="price-info">
             最新週收盤價：17.0<br>
-            近端支撐：16.5<br>近端壓力：17.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：17.1<br>右腳支撐：16.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2540-愛山林</div>
         <div class="price-info">
             最新週收盤價：57.8<br>
-            近端支撐：52.8<br>近端壓力：61.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：58.2<br>右腳支撐：52.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2543-皇昌</div>
         <div class="price-info">
             最新週收盤價：37.45<br>
-            近端支撐：35.98<br>近端壓力：47.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：47.95<br>右腳支撐：35.98<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2597-潤弘</div>
         <div class="price-info">
             最新週收盤價：163.5<br>
-            近端支撐：161.0<br>近端壓力：180.46<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：170.0<br>右腳支撐：161.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2603-長榮</div>
         <div class="price-info">
             最新週收盤價：205.0<br>
-            近端支撐：181.0<br>近端壓力：206.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：215.17<br>右腳支撐：181.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2606-裕民</div>
         <div class="price-info">
             最新週收盤價：64.5<br>
-            近端支撐：59.6<br>近端壓力：67.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：67.85<br>右腳支撐：59.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2607-榮運</div>
         <div class="price-info">
             最新週收盤價：47.0<br>
-            近端支撐：45.76<br>近端壓力：47.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：46.99<br>右腳支撐：45.76<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2609-陽明</div>
         <div class="price-info">
             最新週收盤價：50.6<br>
-            近端支撐：48.1<br>近端壓力：51.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：52.32<br>右腳支撐：48.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2611-志信</div>
         <div class="price-info">
             最新週收盤價：13.4<br>
-            近端支撐：13.35<br>近端壓力：14.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.6<br>右腳支撐：13.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2612-中航</div>
         <div class="price-info">
             最新週收盤價：54.9<br>
-            近端支撐：51.1<br>近端壓力：54.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：57.4<br>右腳支撐：51.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2615-萬海</div>
         <div class="price-info">
             最新週收盤價：85.4<br>
-            近端支撐：73.92<br>近端壓力：87.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：82.98<br>右腳支撐：73.92<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2616-山隆</div>
         <div class="price-info">
             最新週收盤價：13.3<br>
-            近端支撐：13.06<br>近端壓力：13.59<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.54<br>右腳支撐：13.06<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2617-台航</div>
         <div class="price-info">
             最新週收盤價：28.9<br>
-            近端支撐：27.69<br>近端壓力：29.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.5<br>右腳支撐：27.69<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2633-台灣高鐵</div>
         <div class="price-info">
             最新週收盤價：25.9<br>
-            近端支撐：23.77<br>近端壓力：25.83<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.83<br>右腳支撐：23.77<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2634-漢翔</div>
         <div class="price-info">
             最新週收盤價：63.5<br>
-            近端支撐：45.83<br>近端壓力：65.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：49.73<br>右腳支撐：45.83<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2636-台驊控股</div>
         <div class="price-info">
             最新週收盤價：64.5<br>
-            近端支撐：62.5<br>近端壓力：66.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：66.1<br>右腳支撐：62.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2701-萬企</div>
         <div class="price-info">
             最新週收盤價：10.55<br>
-            近端支撐：10.45<br>近端壓力：10.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.95<br>右腳支撐：10.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2702-華園</div>
         <div class="price-info">
             最新週收盤價：12.55<br>
-            近端支撐：12.35<br>近端壓力：13.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.3<br>右腳支撐：12.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2704-國賓</div>
         <div class="price-info">
             最新週收盤價：45.85<br>
-            近端支撐：41.14<br>近端壓力：47.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.87<br>右腳支撐：41.14<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2707-晶華</div>
         <div class="price-info">
             最新週收盤價：176.0<br>
-            近端支撐：168.5<br>近端壓力：181.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：180.5<br>右腳支撐：168.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2712-遠雄來</div>
         <div class="price-info">
             最新週收盤價：14.4<br>
-            近端支撐：14.35<br>近端壓力：15.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.2<br>右腳支撐：14.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2731-雄獅</div>
         <div class="price-info">
             最新週收盤價：146.0<br>
-            近端支撐：143.0<br>近端壓力：147.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：160.59<br>右腳支撐：143.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2748-雲品</div>
         <div class="price-info">
             最新週收盤價：38.2<br>
-            近端支撐：37.57<br>近端壓力：38.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：38.62<br>右腳支撐：37.57<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2801-彰銀</div>
         <div class="price-info">
             最新週收盤價：23.65<br>
-            近端支撐：19.11<br>近端壓力：23.79<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.92<br>右腳支撐：19.11<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2820-華票</div>
         <div class="price-info">
             最新週收盤價：16.3<br>
-            近端支撐：15.85<br>近端壓力：17.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.38<br>右腳支撐：15.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2832-台產</div>
         <div class="price-info">
             最新週收盤價：58.6<br>
-            近端支撐：43.72<br>近端壓力：59.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：46.53<br>右腳支撐：43.72<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2834-臺企銀</div>
         <div class="price-info">
             最新週收盤價：16.75<br>
-            近端支撐：14.6<br>近端壓力：15.01<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.06<br>右腳支撐：14.6<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2836-高雄銀</div>
         <div class="price-info">
             最新週收盤價：11.8<br>
-            近端支撐：11.23<br>近端壓力：12.39<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.44<br>右腳支撐：11.23<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2845-遠東銀</div>
         <div class="price-info">
             最新週收盤價：13.3<br>
-            近端支撐：11.85<br>近端壓力：13.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.65<br>右腳支撐：11.85<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2849-安泰銀</div>
         <div class="price-info">
             最新週收盤價：14.65<br>
-            近端支撐：12.74<br>近端壓力：15.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.61<br>右腳支撐：12.74<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2850-新產</div>
         <div class="price-info">
             最新週收盤價：157.5<br>
-            近端支撐：111.25<br>近端壓力：161.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：114.11<br>右腳支撐：111.25<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2852-第一保</div>
         <div class="price-info">
             最新週收盤價：26.6<br>
-            近端支撐：24.22<br>近端壓力：27.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.77<br>右腳支撐：24.22<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2867-三商壽</div>
         <div class="price-info">
             最新週收盤價：9.77<br>
-            近端支撐：7.52<br>近端壓力：9.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：7.87<br>右腳支撐：7.52<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2881-富邦金</div>
         <div class="price-info">
             最新週收盤價：129.5<br>
-            近端支撐：84.73<br>近端壓力：130.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：92.08<br>右腳支撐：84.73<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2884-玉山金</div>
         <div class="price-info">
             最新週收盤價：38.1<br>
-            近端支撐：29.69<br>近端壓力：38.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.42<br>右腳支撐：29.69<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2886-兆豐金</div>
         <div class="price-info">
             最新週收盤價：51.2<br>
-            近端支撐：39.1<br>近端壓力：53.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：40.55<br>右腳支撐：39.1<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2887-台新新光金</div>
         <div class="price-info">
             最新週收盤價：35.7<br>
-            近端支撐：22.45<br>近端壓力：35.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.61<br>右腳支撐：22.45<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2889-國票金</div>
         <div class="price-info">
             最新週收盤價：15.35<br>
-            近端支撐：14.8<br>近端壓力：15.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：15.25<br>右腳支撐：14.8<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2890-永豐金</div>
         <div class="price-info">
             最新週收盤價：39.55<br>
-            近端支撐：27.74<br>近端壓力：40.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.65<br>右腳支撐：27.74<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2892-第一金</div>
         <div class="price-info">
             最新週收盤價：35.9<br>
-            近端支撐：27.45<br>近端壓力：36.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.5<br>右腳支撐：27.45<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2901-欣欣</div>
         <div class="price-info">
             最新週收盤價：23.85<br>
-            近端支撐：22.6<br>近端壓力：24.45<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：24.0<br>右腳支撐：22.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2906-高林</div>
         <div class="price-info">
             最新週收盤價：12.9<br>
-            近端支撐：11.82<br>近端壓力：13.88<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.64<br>右腳支撐：11.82<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">2908-特力</div>
         <div class="price-info">
             最新週收盤價：22.0<br>
-            近端支撐：19.68<br>近端壓力：22.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：19.93<br>右腳支撐：19.68<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2911-麗嬰房</div>
         <div class="price-info">
             最新週收盤價：6.84<br>
-            近端支撐：6.75<br>近端壓力：8.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：8.0<br>右腳支撐：6.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2912-統一超</div>
         <div class="price-info">
             最新週收盤價：221.5<br>
-            近端支撐：214.67<br>近端壓力：233.93<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：223.34<br>右腳支撐：214.67<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2913-農林</div>
         <div class="price-info">
             最新週收盤價：10.95<br>
-            近端支撐：10.6<br>近端壓力：11.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.25<br>右腳支撐：10.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">2945-三商家購</div>
         <div class="price-info">
             最新週收盤價：41.6<br>
-            近端支撐：40.1<br>近端壓力：41.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：41.9<br>右腳支撐：40.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3002-歐格</div>
         <div class="price-info">
             最新週收盤價：16.5<br>
-            近端支撐：16.0<br>近端壓力：22.53<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.53<br>右腳支撐：16.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">3005-神基</div>
         <div class="price-info">
             最新週收盤價：115.0<br>
-            近端支撐：96.0<br>近端壓力：109.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：109.0<br>右腳支撐：96.0<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3023-信邦</div>
         <div class="price-info">
             最新週收盤價：318.0<br>
-            近端支撐：285.0<br>近端壓力：336.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：336.5<br>右腳支撐：285.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3024-憶聲</div>
         <div class="price-info">
             最新週收盤價：12.5<br>
-            近端支撐：12.1<br>近端壓力：14.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.2<br>右腳支撐：12.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3029-零壹</div>
         <div class="price-info">
             最新週收盤價：107.0<br>
-            近端支撐：95.8<br>近端壓力：109.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：107.5<br>右腳支撐：95.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3036-文曄</div>
         <div class="price-info">
             最新週收盤價：225.0<br>
-            近端支撐：188.5<br>近端壓力：280.98<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：280.98<br>右腳支撐：188.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3043-科風</div>
         <div class="price-info">
             最新週收盤價：20.25<br>
-            近端支撐：19.5<br>近端壓力：23.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.8<br>右腳支撐：19.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3045-台灣大</div>
         <div class="price-info">
             最新週收盤價：110.5<br>
-            近端支撐：108.5<br>近端壓力：113.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：114.48<br>右腳支撐：108.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3046-建碁</div>
         <div class="price-info">
             最新週收盤價：55.5<br>
-            近端支撐：51.8<br>近端壓力：55.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：55.6<br>右腳支撐：51.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3047-訊舟</div>
         <div class="price-info">
             最新週收盤價：14.65<br>
-            近端支撐：13.8<br>近端壓力：17.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.65<br>右腳支撐：13.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3060-銘異</div>
         <div class="price-info">
             最新週收盤價：29.05<br>
-            近端支撐：27.15<br>近端壓力：37.69<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：37.69<br>右腳支撐：27.15<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3130-一零四</div>
         <div class="price-info">
             最新週收盤價：204.0<br>
-            近端支撐：203.0<br>近端壓力：207.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：209.1<br>右腳支撐：203.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3168-眾福科</div>
         <div class="price-info">
             最新週收盤價：42.75<br>
-            近端支撐：41.15<br>近端壓力：48.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：45.05<br>右腳支撐：41.15<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3257-虹冠電</div>
         <div class="price-info">
             最新週收盤價：51.6<br>
-            近端支撐：50.5<br>近端壓力：71.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：71.2<br>右腳支撐：50.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3305-昇貿</div>
         <div class="price-info">
             最新週收盤價：111.5<br>
-            近端支撐：98.4<br>近端壓力：154.49<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：154.49<br>右腳支撐：98.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3308-聯德</div>
         <div class="price-info">
             最新週收盤價：19.8<br>
-            近端支撐：19.5<br>近端壓力：22.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.65<br>右腳支撐：19.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3338-泰碩</div>
         <div class="price-info">
             最新週收盤價：63.6<br>
-            近端支撐：58.0<br>近端壓力：77.23<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：79.79<br>右腳支撐：58.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3356-奇偶</div>
         <div class="price-info">
             最新週收盤價：57.1<br>
-            近端支撐：56.2<br>近端壓力：61.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：61.8<br>右腳支撐：56.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3413-京鼎</div>
         <div class="price-info">
             最新週收盤價：321.5<br>
-            近端支撐：298.0<br>近端壓力：371.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：371.0<br>右腳支撐：298.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3432-台端</div>
         <div class="price-info">
             最新週收盤價：16.0<br>
-            近端支撐：15.8<br>近端壓力：20.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.2<br>右腳支撐：15.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3543-州巧</div>
         <div class="price-info">
             最新週收盤價：33.3<br>
-            近端支撐：27.2<br>近端壓力：33.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.4<br>右腳支撐：27.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3550-聯穎</div>
         <div class="price-info">
             最新週收盤價：22.55<br>
-            近端支撐：19.75<br>近端壓力：37.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：37.25<br>右腳支撐：19.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3593-力銘</div>
         <div class="price-info">
             最新週收盤價：12.5<br>
-            近端支撐：11.6<br>近端壓力：19.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.02<br>右腳支撐：11.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3607-谷崧</div>
         <div class="price-info">
             最新週收盤價：14.1<br>
-            近端支撐：13.43<br>近端壓力：16.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.76<br>右腳支撐：13.43<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3622-洋華</div>
         <div class="price-info">
             最新週收盤價：54.0<br>
-            近端支撐：53.0<br>近端壓力：58.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：59.1<br>右腳支撐：53.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3679-新至陞</div>
         <div class="price-info">
             最新週收盤價：109.5<br>
-            近端支撐：108.5<br>近端壓力：115.89<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：115.89<br>右腳支撐：108.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">3694-海華</div>
         <div class="price-info">
             最新週收盤價：57.8<br>
-            近端支撐：53.1<br>近端壓力：64.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：64.6<br>右腳支撐：53.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">3704-合勤控</div>
         <div class="price-info">
             最新週收盤價：48.8<br>
-            近端支撐：41.4<br>近端壓力：47.84<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：46.8<br>右腳支撐：41.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">3706-神達</div>
         <div class="price-info">
             最新週收盤價：91.9<br>
-            近端支撐：87.4<br>近端壓力：92.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：91.3<br>右腳支撐：87.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">3712-永崴投控</div>
         <div class="price-info">
             最新週收盤價：20.3<br>
-            近端支撐：16.55<br>近端壓力：18.95<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.95<br>右腳支撐：16.55<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4104-佳醫</div>
         <div class="price-info">
             最新週收盤價：69.7<br>
-            近端支撐：68.7<br>近端壓力：70.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：71.5<br>右腳支撐：68.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4106-雃博</div>
         <div class="price-info">
             最新週收盤價：24.05<br>
-            近端支撐：22.25<br>近端壓力：23.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.4<br>右腳支撐：22.25<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4133-亞諾法</div>
         <div class="price-info">
             最新週收盤價：21.5<br>
-            近端支撐：20.25<br>近端壓力：22.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：21.24<br>右腳支撐：20.25<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4137-麗豐-KY</div>
         <div class="price-info">
             最新週收盤價：95.5<br>
-            近端支撐：94.5<br>近端壓力：105.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：105.05<br>右腳支撐：94.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4142-國光生</div>
         <div class="price-info">
             最新週收盤價：17.15<br>
-            近端支撐：16.55<br>近端壓力：17.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：17.85<br>右腳支撐：16.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4148-全宇生技-KY</div>
         <div class="price-info">
             最新週收盤價：30.95<br>
-            近端支撐：28.53<br>近端壓力：31.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：31.43<br>右腳支撐：28.53<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4169-泰宗</div>
         <div class="price-info">
             最新週收盤價：162.0<br>
-            近端支撐：153.31<br>近端壓力：269.66<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：158.8<br>右腳支撐：153.31<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4178-永笙-KY</div>
         <div class="price-info">
             最新週收盤價：18.05<br>
-            近端支撐：17.3<br>近端壓力：20.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.0<br>右腳支撐：17.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4190-佐登-KY</div>
         <div class="price-info">
             最新週收盤價：25.3<br>
-            近端支撐：23.58<br>近端壓力：25.98<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：26.72<br>右腳支撐：23.58<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4306-炎洲</div>
         <div class="price-info">
             最新週收盤價：14.2<br>
-            近端支撐：12.56<br>近端壓力：15.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.18<br>右腳支撐：12.56<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4426-利勤</div>
         <div class="price-info">
             最新週收盤價：7.92<br>
-            近端支撐：7.65<br>近端壓力：9.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：8.49<br>右腳支撐：7.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4438-廣越</div>
         <div class="price-info">
             最新週收盤價：60.5<br>
-            近端支撐：58.4<br>近端壓力：62.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：61.9<br>右腳支撐：58.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4440-宜新實業</div>
         <div class="price-info">
             最新週收盤價：17.45<br>
-            近端支撐：17.05<br>近端壓力：18.05<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.65<br>右腳支撐：17.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4532-瑞智</div>
         <div class="price-info">
             最新週收盤價：24.1<br>
-            近端支撐：23.65<br>近端壓力：29.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.1<br>右腳支撐：23.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4560-強信-KY</div>
         <div class="price-info">
             最新週收盤價：31.55<br>
-            近端支撐：31.4<br>近端壓力：32.36<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：32.36<br>右腳支撐：31.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4562-穎漢</div>
         <div class="price-info">
             最新週收盤價：31.05<br>
-            近端支撐：29.0<br>近端壓力：36.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.8<br>右腳支撐：29.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4571-鈞興-KY</div>
         <div class="price-info">
             最新週收盤價：163.0<br>
-            近端支撐：147.5<br>近端壓力：222.74<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：222.74<br>右腳支撐：147.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4572-駐龍</div>
         <div class="price-info">
             最新週收盤價：140.0<br>
-            近端支撐：138.33<br>近端壓力：146.07<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：144.13<br>右腳支撐：138.33<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4581-光隆精密-KY</div>
         <div class="price-info">
             最新週收盤價：51.0<br>
-            近端支撐：49.45<br>近端壓力：51.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：51.0<br>右腳支撐：49.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4582-聚恆-創</div>
         <div class="price-info">
             最新週收盤價：28.35<br>
-            近端支撐：24.4<br>近端壓力：28.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：26.55<br>右腳支撐：24.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4585-達明</div>
         <div class="price-info">
             最新週收盤價：301.0<br>
-            近端支撐：282.5<br>近端壓力：340.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：340.5<br>右腳支撐：282.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4588-玖鼎電力</div>
         <div class="price-info">
             最新週收盤價：51.0<br>
-            近端支撐：50.5<br>近端壓力：56.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：57.12<br>右腳支撐：50.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4590-富田-創</div>
         <div class="price-info">
             最新週收盤價：80.3<br>
-            近端支撐：71.36<br>近端壓力：93.59<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：76.04<br>右腳支撐：71.36<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">4736-泰博</div>
         <div class="price-info">
             最新週收盤價：129.5<br>
-            近端支撐：123.0<br>近端壓力：126.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：126.0<br>右腳支撐：123.0<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4739-康普</div>
         <div class="price-info">
             最新週收盤價：85.9<br>
-            近端支撐：76.0<br>近端壓力：122.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：122.5<br>右腳支撐：76.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4746-台耀</div>
         <div class="price-info">
             最新週收盤價：52.9<br>
-            近端支撐：50.7<br>近端壓力：54.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：54.8<br>右腳支撐：50.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4764-雙鍵</div>
         <div class="price-info">
             最新週收盤價：261.0<br>
-            近端支撐：260.0<br>近端壓力：338.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：338.5<br>右腳支撐：260.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4771-望隼</div>
         <div class="price-info">
             最新週收盤價：192.5<br>
-            近端支撐：182.0<br>近端壓力：207.29<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：207.29<br>右腳支撐：182.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4904-遠傳</div>
         <div class="price-info">
             最新週收盤價：101.0<br>
-            近端支撐：95.0<br>近端壓力：105.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：104.97<br>右腳支撐：95.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4912-聯德控股-KY</div>
         <div class="price-info">
             最新週收盤價：89.6<br>
-            近端支撐：82.3<br>近端壓力：113.99<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：113.99<br>右腳支撐：82.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4916-事欣科</div>
         <div class="price-info">
             最新週收盤價：104.5<br>
-            近端支撐：95.0<br>近端壓力：114.36<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：114.36<br>右腳支撐：95.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4930-燦星網</div>
         <div class="price-info">
             最新週收盤價：16.25<br>
-            近端支撐：15.95<br>近端壓力：18.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.0<br>右腳支撐：15.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4952-凌通</div>
         <div class="price-info">
             最新週收盤價：48.9<br>
-            近端支撐：47.3<br>近端壓力：60.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：60.1<br>右腳支撐：47.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4961-天鈺</div>
         <div class="price-info">
             最新週收盤價：158.5<br>
-            近端支撐：149.5<br>近端壓力：176.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：176.0<br>右腳支撐：149.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">4994-傳奇</div>
         <div class="price-info">
             最新週收盤價：88.2<br>
-            近端支撐：84.68<br>近端壓力：92.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：97.15<br>右腳支撐：84.68<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5203-訊連</div>
         <div class="price-info">
             最新週收盤價：67.5<br>
-            近端支撐：64.2<br>近端壓力：71.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：71.8<br>右腳支撐：64.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5222-全訊</div>
         <div class="price-info">
             最新週收盤價：113.0<br>
-            近端支撐：111.5<br>近端壓力：127.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：127.5<br>右腳支撐：111.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5225-東科-KY</div>
         <div class="price-info">
             最新週收盤價：75.5<br>
-            近端支撐：69.5<br>近端壓力：76.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：76.2<br>右腳支撐：69.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5258-虹堡</div>
         <div class="price-info">
             最新週收盤價：52.8<br>
-            近端支撐：46.55<br>近端壓力：52.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：57.6<br>右腳支撐：46.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5269-祥碩</div>
         <div class="price-info">
             最新週收盤價：1415.0<br>
-            近端支撐：1315.0<br>近端壓力：1482.77<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：1482.77<br>右腳支撐：1315.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5292-華懋</div>
         <div class="price-info">
             最新週收盤價：163.0<br>
-            近端支撐：156.0<br>近端壓力：202.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：224.22<br>右腳支撐：156.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">5306-桂盟</div>
         <div class="price-info">
             最新週收盤價：89.9<br>
-            近端支撐：83.87<br>近端壓力：95.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：87.63<br>右腳支撐：83.87<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5484-慧友</div>
         <div class="price-info">
             最新週收盤價：41.3<br>
-            近端支撐：37.7<br>近端壓力：49.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：57.9<br>右腳支撐：37.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5521-工信</div>
         <div class="price-info">
             最新週收盤價：10.25<br>
-            近端支撐：9.64<br>近端壓力：10.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.65<br>右腳支撐：9.64<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5522-遠雄</div>
         <div class="price-info">
             最新週收盤價：64.4<br>
-            近端支撐：64.1<br>近端壓力：68.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：73.85<br>右腳支撐：64.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">5525-順天</div>
         <div class="price-info">
             最新週收盤價：23.25<br>
-            近端支撐：21.6<br>近端壓力：22.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：21.62<br>右腳支撐：20.49<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5531-鄉林</div>
         <div class="price-info">
             最新週收盤價：7.78<br>
-            近端支撐：7.73<br>近端壓力：8.27<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：8.27<br>右腳支撐：7.73<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">5533-皇鼎</div>
         <div class="price-info">
             最新週收盤價：13.95<br>
-            近端支撐：13.31<br>近端壓力：14.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：13.55<br>右腳支撐：13.31<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5534-長虹</div>
         <div class="price-info">
             最新週收盤價：78.1<br>
-            近端支撐：77.6<br>近端壓力：81.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：83.4<br>右腳支撐：77.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">5880-合庫金</div>
         <div class="price-info">
             最新週收盤價：26.6<br>
-            近端支撐：22.7<br>近端壓力：27.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.9<br>右腳支撐：22.7<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">5907-大洋-KY</div>
         <div class="price-info">
             最新週收盤價：4.95<br>
-            近端支撐：4.87<br>近端壓力：5.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：5.3<br>右腳支撐：4.87<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6112-邁達特</div>
         <div class="price-info">
             最新週收盤價：42.6<br>
-            近端支撐：38.85<br>近端壓力：48.11<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：43.01<br>右腳支撐：38.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6115-鎰勝</div>
         <div class="price-info">
             最新週收盤價：45.1<br>
-            近端支撐：43.99<br>近端壓力：46.06<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：45.26<br>右腳支撐：43.99<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6133-金橋</div>
         <div class="price-info">
             最新週收盤價：21.95<br>
-            近端支撐：20.05<br>近端壓力：25.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：25.8<br>右腳支撐：20.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6136-富爾特</div>
         <div class="price-info">
             最新週收盤價：24.9<br>
-            近端支撐：23.94<br>近端壓力：24.66<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：24.66<br>右腳支撐：23.94<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6165-浪凡</div>
         <div class="price-info">
             最新週收盤價：49.4<br>
-            近端支撐：48.55<br>近端壓力：50.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：50.1<br>右腳支撐：48.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6183-關貿</div>
         <div class="price-info">
             最新週收盤價：92.1<br>
-            近端支撐：89.0<br>近端壓力：93.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：95.3<br>右腳支撐：89.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6192-巨路</div>
         <div class="price-info">
             最新週收盤價：114.5<br>
-            近端支撐：111.5<br>近端壓力：120.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：132.0<br>右腳支撐：111.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6202-盛群</div>
         <div class="price-info">
             最新週收盤價：60.1<br>
-            近端支撐：53.4<br>近端壓力：73.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：73.3<br>右腳支撐：53.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6216-居易</div>
         <div class="price-info">
             最新週收盤價：21.8<br>
-            近端支撐：21.75<br>近端壓力：23.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：23.6<br>右腳支撐：21.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6225-天瀚</div>
         <div class="price-info">
             最新週收盤價：24.35<br>
-            近端支撐：22.5<br>近端壓力：26.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：26.0<br>右腳支撐：22.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6281-全國電</div>
         <div class="price-info">
             最新週收盤價：51.4<br>
-            近端支撐：50.8<br>近端壓力：52.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：52.1<br>右腳支撐：50.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6282-康舒</div>
         <div class="price-info">
             最新週收盤價：48.0<br>
-            近端支撐：42.4<br>近端壓力：58.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：63.8<br>右腳支撐：42.4<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6285-啟碁</div>
         <div class="price-info">
             最新週收盤價：260.0<br>
-            近端支撐：222.0<br>近端壓力：313.71<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：260.5<br>右腳支撐：222.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6405-悅城</div>
         <div class="price-info">
             最新週收盤價：38.95<br>
-            近端支撐：35.3<br>近端壓力：79.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：79.8<br>右腳支撐：35.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6464-台數科</div>
         <div class="price-info">
             最新週收盤價：78.4<br>
-            近端支撐：72.45<br>近端壓力：79.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：73.77<br>右腳支撐：72.45<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6504-南六</div>
         <div class="price-info">
             最新週收盤價：38.8<br>
-            近端支撐：35.8<br>近端壓力：40.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：36.25<br>右腳支撐：35.8<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6534-正瀚-創</div>
         <div class="price-info">
             最新週收盤價：94.8<br>
-            近端支撐：89.7<br>近端壓力：97.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：97.0<br>右腳支撐：89.7<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6541-泰福-KY</div>
         <div class="price-info">
             最新週收盤價：37.95<br>
-            近端支撐：37.3<br>近端壓力：41.4<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：41.9<br>右腳支撐：37.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6581-鋼聯</div>
         <div class="price-info">
             最新週收盤價：108.5<br>
-            近端支撐：106.0<br>近端壓力：110.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：110.0<br>右腳支撐：106.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6625-必應</div>
         <div class="price-info">
             最新週收盤價：76.7<br>
-            近端支撐：74.6<br>近端壓力：79.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：79.2<br>右腳支撐：74.6<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6641-基士德-KY</div>
         <div class="price-info">
             最新週收盤價：17.95<br>
-            近端支撐：17.5<br>近端壓力：18.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.55<br>右腳支撐：17.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6655-科定</div>
         <div class="price-info">
             最新週收盤價：120.0<br>
-            近端支撐：117.5<br>近端壓力：135.02<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：121.0<br>右腳支撐：117.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6666-羅麗芬-KY</div>
         <div class="price-info">
             最新週收盤價：42.7<br>
-            近端支撐：40.15<br>近端壓力：44.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：41.4<br>右腳支撐：40.15<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6670-復盛應用</div>
         <div class="price-info">
             最新週收盤價：258.5<br>
-            近端支撐：254.0<br>近端壓力：267.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：267.5<br>右腳支撐：254.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6695-芯鼎</div>
         <div class="price-info">
             最新週收盤價：51.1<br>
-            近端支撐：49.8<br>近端壓力：60.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：60.3<br>右腳支撐：49.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6754-匯僑設計</div>
         <div class="price-info">
             最新週收盤價：42.0<br>
-            近端支撐：40.67<br>近端壓力：42.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.15<br>右腳支撐：40.67<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6781-AES-KY</div>
         <div class="price-info">
             最新週收盤價：1065.0<br>
-            近端支撐：916.0<br>近端壓力：1204.92<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：1209.83<br>右腳支撐：916.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6782-視陽</div>
         <div class="price-info">
             最新週收盤價：199.0<br>
-            近端支撐：183.0<br>近端壓力：200.45<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：200.45<br>右腳支撐：183.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6790-永豐實</div>
         <div class="price-info">
             最新週收盤價：38.25<br>
-            近端支撐：36.64<br>近端壓力：38.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：37.44<br>右腳支撐：36.64<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6792-詠業</div>
         <div class="price-info">
             最新週收盤價：55.9<br>
-            近端支撐：53.2<br>近端壓力：70.14<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：70.14<br>右腳支撐：53.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6796-晉弘</div>
         <div class="price-info">
             最新週收盤價：56.6<br>
-            近端支撐：56.3<br>近端壓力：60.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：60.25<br>右腳支撐：56.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6807-峰源-KY</div>
         <div class="price-info">
             最新週收盤價：35.2<br>
-            近端支撐：32.8<br>近端壓力：33.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.8<br>右腳支撐：32.8<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6863-永道-KY</div>
         <div class="price-info">
             最新週收盤價：135.0<br>
-            近端支撐：88.96<br>近端壓力：108.49<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：108.49<br>右腳支撐：88.96<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6885-全福生技</div>
         <div class="price-info">
             最新週收盤價：20.85<br>
-            近端支撐：20.75<br>近端壓力：26.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：26.55<br>右腳支撐：20.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6887-寶綠特-KY</div>
         <div class="price-info">
             最新週收盤價：37.1<br>
-            近端支撐：31.73<br>近端壓力：37.85<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.13<br>右腳支撐：31.73<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6914-阜爾運通</div>
         <div class="price-info">
             最新週收盤價：147.0<br>
-            近端支撐：141.0<br>近端壓力：147.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：154.0<br>右腳支撐：141.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6916-華凌</div>
         <div class="price-info">
             最新週收盤價：18.1<br>
-            近端支撐：17.9<br>近端壓力：22.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：22.3<br>右腳支撐：17.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6923-中台</div>
         <div class="price-info">
             最新週收盤價：73.6<br>
-            近端支撐：72.8<br>近端壓力：78.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：77.7<br>右腳支撐：72.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6936-永鴻生技</div>
         <div class="price-info">
             最新週收盤價：31.75<br>
-            近端支撐：31.45<br>近端壓力：33.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：34.13<br>右腳支撐：31.45<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6937-天虹</div>
         <div class="price-info">
             最新週收盤價：260.0<br>
-            近端支撐：254.0<br>近端壓力：290.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：290.0<br>右腳支撐：254.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6951-青新-創</div>
         <div class="price-info">
             最新週收盤價：71.2<br>
-            近端支撐：68.12<br>近端壓力：72.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：70.42<br>右腳支撐：68.12<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">6958-日盛台駿</div>
         <div class="price-info">
             最新週收盤價：18.7<br>
-            近端支撐：16.4<br>近端壓力：18.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：17.35<br>右腳支撐：16.4<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">6965-中傑-KY</div>
         <div class="price-info">
             最新週收盤價：76.2<br>
-            近端支撐：72.3<br>近端壓力：80.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：84.23<br>右腳支撐：72.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">7732-金興精密</div>
         <div class="price-info">
             最新週收盤價：35.65<br>
-            近端支撐：35.05<br>近端壓力：35.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：36.75<br>右腳支撐：35.05<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">7823-奧義賽博-KY創</div>
         <div class="price-info">
             最新週收盤價：84.5<br>
-            近端支撐：80.0<br>近端壓力：88.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：88.8<br>右腳支撐：80.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8016-矽創</div>
         <div class="price-info">
             最新週收盤價：292.5<br>
-            近端支撐：266.5<br>近端壓力：363.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：363.0<br>右腳支撐：266.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8039-台虹</div>
         <div class="price-info">
             最新週收盤價：220.0<br>
-            近端支撐：135.51<br>近端壓力：240.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：159.65<br>右腳支撐：135.51<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8072-陞泰</div>
         <div class="price-info">
             最新週收盤價：26.9<br>
-            近端支撐：26.5<br>近端壓力：29.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：29.25<br>右腳支撐：26.5<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8101-華冠</div>
         <div class="price-info">
             最新週收盤價：13.1<br>
-            近端支撐：12.8<br>近端壓力：16.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.2<br>右腳支撐：12.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8103-瀚荃</div>
         <div class="price-info">
             最新週收盤價：78.7<br>
-            近端支撐：73.1<br>近端壓力：100.83<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：121.2<br>右腳支撐：73.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8112-至上</div>
         <div class="price-info">
             最新週收盤價：86.2<br>
-            近端支撐：80.3<br>近端壓力：94.76<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：94.76<br>右腳支撐：80.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8131-福懋科</div>
         <div class="price-info">
             最新週收盤價：66.0<br>
-            近端支撐：56.2<br>近端壓力：74.99<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：74.99<br>右腳支撐：56.2<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8341-日友</div>
         <div class="price-info">
             最新週收盤價：75.3<br>
-            近端支撐：74.1<br>近端壓力：77.1<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：77.04<br>右腳支撐：74.1<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8367-建新國際</div>
         <div class="price-info">
             最新週收盤價：40.3<br>
-            近端支撐：39.9<br>近端壓力：40.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：43.7<br>右腳支撐：39.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8404-百和興業-KY</div>
         <div class="price-info">
             最新週收盤價：16.2<br>
-            近端支撐：16.0<br>近端壓力：16.93<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.49<br>右腳支撐：16.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8411-福貞-KY</div>
         <div class="price-info">
             最新週收盤價：13.1<br>
-            近端支撐：11.76<br>近端壓力：13.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.1<br>右腳支撐：11.76<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8422-可寧衛*</div>
         <div class="price-info">
             最新週收盤價：26.0<br>
-            近端支撐：24.75<br>近端壓力：28.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：28.35<br>右腳支撐：24.75<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8429-金麗-KY</div>
         <div class="price-info">
             最新週收盤價：6.14<br>
-            近端支撐：6.02<br>近端壓力：6.76<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：6.76<br>右腳支撐：6.02<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8443-阿瘦</div>
         <div class="price-info">
             最新週收盤價：11.45<br>
-            近端支撐：11.35<br>近端壓力：11.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：11.5<br>右腳支撐：11.35<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8462-柏文</div>
         <div class="price-info">
             最新週收盤價：166.5<br>
-            近端支撐：131.52<br>近端壓力：168.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：141.5<br>右腳支撐：131.52<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8478-東哥遊艇</div>
         <div class="price-info">
             最新週收盤價：150.5<br>
-            近端支撐：149.0<br>近端壓力：160.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：160.0<br>右腳支撐：149.0<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8481-政伸</div>
         <div class="price-info">
             最新週收盤價：40.0<br>
-            近端支撐：37.08<br>近端壓力：40.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：39.46<br>右腳支撐：37.08<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8482-商億-KY</div>
         <div class="price-info">
             最新週收盤價：48.8<br>
-            近端支撐：47.8<br>近端壓力：53.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：48.52<br>右腳支撐：47.8<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">8487-愛爾達-創</div>
         <div class="price-info">
             最新週收盤價：74.9<br>
-            近端支撐：63.68<br>近端壓力：82.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：68.22<br>右腳支撐：63.68<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">8488-吉源-KY</div>
         <div class="price-info">
             最新週收盤價：10.05<br>
-            近端支撐：9.85<br>近端壓力：10.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.5<br>右腳支撐：9.85<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9136-巨騰-DR</div>
         <div class="price-info">
             最新週收盤價：11.35<br>
-            近端支撐：10.9<br>近端壓力：17.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：17.35<br>右腳支撐：10.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9902-台火</div>
         <div class="price-info">
             最新週收盤價：13.7<br>
-            近端支撐：13.65<br>近端壓力：14.25<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.8<br>右腳支撐：13.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9905-大華</div>
         <div class="price-info">
             最新週收盤價：20.9<br>
-            近端支撐：19.58<br>近端壓力：20.67<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：20.67<br>右腳支撐：19.58<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9908-大台北</div>
         <div class="price-info">
             最新週收盤價：29.0<br>
-            近端支撐：27.93<br>近端壓力：29.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：30.67<br>右腳支撐：27.93<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9910-豐泰</div>
         <div class="price-info">
             最新週收盤價：67.4<br>
-            近端支撐：66.8<br>近端壓力：87.8<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：87.8<br>右腳支撐：66.8<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9912-偉聯</div>
         <div class="price-info">
             最新週收盤價：12.85<br>
-            近端支撐：12.35<br>近端壓力：12.75<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.8<br>右腳支撐：12.35<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9918-欣天然</div>
         <div class="price-info">
             最新週收盤價：42.6<br>
-            近端支撐：41.61<br>近端壓力：43.35<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：43.4<br>右腳支撐：41.61<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9919-康那香</div>
         <div class="price-info">
             最新週收盤價：14.0<br>
-            近端支撐：13.65<br>近端壓力：14.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：14.3<br>右腳支撐：13.65<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9925-新保</div>
         <div class="price-info">
             最新週收盤價：40.1<br>
-            近端支撐：38.21<br>近端壓力：40.3<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：39.07<br>右腳支撐：38.21<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9926-新海</div>
         <div class="price-info">
             最新週收盤價：49.0<br>
-            近端支撐：47.07<br>近端壓力：49.65<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：49.85<br>右腳支撐：47.07<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9927-泰銘</div>
         <div class="price-info">
             最新週收盤價：68.6<br>
-            近端支撐：68.3<br>近端壓力：69.9<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：69.7<br>右腳支撐：68.3<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9928-中視</div>
         <div class="price-info">
             最新週收盤價：18.0<br>
-            近端支撐：17.55<br>近端壓力：18.7<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.7<br>右腳支撐：17.55<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9929-秋雨</div>
         <div class="price-info">
             最新週收盤價：11.15<br>
-            近端支撐：10.95<br>近端壓力：11.5<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：12.7<br>右腳支撐：10.95<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9931-欣高</div>
         <div class="price-info">
             最新週收盤價：33.95<br>
-            近端支撐：33.02<br>近端壓力：34.15<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：33.44<br>右腳支撐：33.02<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9934-成霖</div>
         <div class="price-info">
             最新週收盤價：10.65<br>
-            近端支撐：9.86<br>近端壓力：10.94<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：10.94<br>右腳支撐：9.86<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9935-慶豐富</div>
         <div class="price-info">
             最新週收盤價：19.65<br>
-            近端支撐：17.79<br>近端壓力：18.55<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.17<br>右腳支撐：17.79<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9937-全國</div>
         <div class="price-info">
             最新週收盤價：55.4<br>
-            近端支撐：52.87<br>近端壓力：56.2<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：56.81<br>右腳支撐：52.87<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9938-百和</div>
         <div class="price-info">
             最新週收盤價：42.5<br>
-            近端支撐：40.42<br>近端壓力：43.74<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：42.57<br>右腳支撐：40.42<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-formed" data-status="formed">
         <div class="stock-title">9944-新麗</div>
         <div class="price-info">
             最新週收盤價：17.6<br>
-            近端支撐：16.67<br>近端壓力：18.0<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：16.81<br>右腳支撐：16.67<br>
+            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
         </div>
     </div>
     
-    <div class="card">
+    <div class="card w-forming" data-status="forming">
         <div class="stock-title">9946-三發地產</div>
         <div class="price-info">
             最新週收盤價：17.85<br>
-            近端支撐：15.9<br>近端壓力：20.6<br>
-            <span class="highlight">⚠️ 週 K 級別 W 底浮現！</span>
+            關鍵頸線：18.45<br>右腳支撐：15.9<br>
+            <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
     </div>
     
-        <div class="footer">最後更新時間 (台灣時間)：2026-08-05 19:01:27</div>
+        </div>
+        
+        <div class="footer">最後更新時間 (台灣時間)：2026-08-06 07:57:12</div>
     </div>
+
+    <!-- JavaScript 篩選邏輯 -->
+    <script>
+    function filterCards() {
+        var searchText = document.getElementById('searchInput').value.toLowerCase();
+        var statusFilter = document.getElementById('statusFilter').value;
+        var cards = document.querySelectorAll('.card');
+        
+        cards.forEach(function(card) {
+            var text = card.textContent.toLowerCase();
+            var status = card.getAttribute('data-status');
+            
+            var matchText = text.includes(searchText);
+            var matchStatus = (statusFilter === 'all') || (status === statusFilter);
+            
+            // 同時符合文字搜尋與狀態篩選，才顯示卡片
+            if (matchText && matchStatus) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    </script>
 </body>
 </html>

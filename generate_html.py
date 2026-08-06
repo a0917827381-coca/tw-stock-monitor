@@ -18,34 +18,39 @@ HTML_TEMPLATE = """
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #333; font-size: 1.5em; }
         
-        /* 篩選器介面設計 */
         .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .filters input, .filters select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; flex: 1; min-width: 140px; }
         
-        /* 卡片設計與顏色區分 */
         .card { border-left: 5px solid #ccc; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 5px; display: block; }
-        .card.w-forming { border-left-color: #ffc107; background: #fff8e1; } /* 黃色：快成形 */
-        .card.w-formed { border-left-color: #28a745; background: #e8f5e9; } /* 綠色：已成形 */
+        .card.w-forming { border-left-color: #ffc107; background: #fff8e1; } 
+        .card.w-formed { border-left-color: #28a745; background: #e8f5e9; } 
+        .card.w-none { border-left-color: #999; background: #f1f1f1; opacity: 0.8; }
         
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .stock-category { font-size: 0.75em; color: #fff; background-color: #555; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
         .price-info { color: #555; line-height: 1.6; }
         .tag-forming { color: #d9534f; font-weight: bold; }
         .tag-formed { color: #28a745; font-weight: bold; }
+        .tag-none { color: #666; font-style: italic; }
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
-        .empty-msg { text-align: center; color: #888; padding: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📈 台股「週K線」W底潛力股</h1>
         
-        <!-- 搜尋與篩選器 -->
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="🔍 輸入代碼或名稱 (如: 台積電)" onkeyup="filterCards()">
+            <input type="text" id="searchInput" placeholder="🔍 搜尋代碼或名稱 (未達標也會顯示)" onkeyup="filterCards()">
+            <select id="categoryFilter" onchange="filterCards()">
+                <option value="all">📁 所有產業分類</option>
+                <option value="電子科技股">💻 電子科技股</option>
+                <option value="金融保險股">🏦 金融保險股</option>
+                <option value="傳統產業與其他">🏭 傳統產業與其他</option>
+            </select>
             <select id="statusFilter" onchange="filterCards()">
-                <option value="all">📊 顯示全部型態</option>
-                <option value="formed">🚀 只看【已成形】(突破頸線)</option>
-                <option value="forming">⚠️ 只看【快成形】(右腳反彈)</option>
+                <option value="all">📊 顯示成形與快成形</option>
+                <option value="formed">🚀 只看【已成形】</option>
+                <option value="forming">⚠️ 只看【快成形】</option>
             </select>
         </div>
 
@@ -56,28 +61,48 @@ HTML_TEMPLATE = """
         <div class="footer">最後更新時間 (台灣時間)：{update_time}</div>
     </div>
 
-    <!-- JavaScript 篩選邏輯 -->
     <script>
     function filterCards() {
-        var searchText = document.getElementById('searchInput').value.toLowerCase();
+        var searchText = document.getElementById('searchInput').value.toLowerCase().trim();
         var statusFilter = document.getElementById('statusFilter').value;
+        var categoryFilter = document.getElementById('categoryFilter').value;
         var cards = document.querySelectorAll('.card');
         
         cards.forEach(function(card) {
-            var text = card.textContent.toLowerCase();
+            var text = card.querySelector('.stock-title').textContent.toLowerCase();
             var status = card.getAttribute('data-status');
+            var category = card.getAttribute('data-category');
             
             var matchText = text.includes(searchText);
-            var matchStatus = (statusFilter === 'all') || (status === statusFilter);
+            var matchCategory = (categoryFilter === 'all') || (category === categoryFilter);
             
-            // 同時符合文字搜尋與狀態篩選，才顯示卡片
-            if (matchText && matchStatus) {
-                card.style.display = 'block';
+            if (searchText !== "") {
+                // 有輸入搜尋文字時：只要符合文字與產業分類，連同「未達標」的股票一併顯示
+                if (matchText && matchCategory) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             } else {
-                card.style.display = 'none';
+                // 沒有搜尋文字時：預設【絕對不顯示】未達標(none)的股票，並套用狀態過濾
+                var matchStatus = false;
+                if (statusFilter === 'all' && (status === 'formed' || status === 'forming')) {
+                    matchStatus = true;
+                } else if (status === statusFilter) {
+                    matchStatus = true;
+                }
+                
+                if (matchStatus && matchCategory) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             }
         });
     }
+    
+    // 網頁載入時自動執行一次，將未達標的卡片隱藏
+    window.onload = filterCards;
     </script>
 </body>
 </html>
@@ -99,12 +124,26 @@ def get_twse_all_stocks():
         print(f"抓取清單失敗: {e}")
         return {}
 
+def get_category(ticker):
+    """利用股票代碼前兩碼，快速對應奇摩股市的常見大分類"""
+    code = ticker.split('.')[0]
+    if code.startswith('28'):
+        return '金融保險股'
+    # 台股常見電子類股代碼前綴
+    tech_prefixes = ('23','24','30','31','32','33','34','35','36','37','49','52','53','54','61','62','64','65','80','81','82','66','84')
+    if code.startswith(tech_prefixes):
+        return '電子科技股'
+    return '傳統產業與其他'
+
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", interval="1wk")
     
+    category = get_category(ticker)
+    display_title = f"{ticker.replace('.TW', '')}-{stock_name}"
+    
     if df.empty or len(df) < 10:
-        return ""
+        return "" 
     
     prices = df['Close'].values
     local_min_idx = argrelextrema(prices, np.less, order=3)[0]
@@ -112,6 +151,8 @@ def analyze_stock(ticker, stock_name):
     is_forming = False
     is_formed = False
     neckline = 0
+    last_low = 0
+    current_price = round(prices[-1], 2)
 
     if len(local_min_idx) >= 2:
         last_low_idx = local_min_idx[-1]
@@ -120,43 +161,44 @@ def analyze_stock(ticker, stock_name):
         last_low = prices[last_low_idx]
         prev_low = prices[prev_low_idx]
         
-        # 計算「頸線」：兩次低點之間的最高價
         if prev_low_idx < last_low_idx:
             between_prices = prices[prev_low_idx:last_low_idx+1]
             if len(between_prices) > 0:
                 neckline = np.max(between_prices)
                 
-        # 條件 1：兩個低點相近 (誤差 5% 內)
         if abs(last_low - prev_low) / prev_low < 0.05:
-            # 條件 2：目前價格是否已經從右腳反彈
-            if current_price := round(prices[-1], 2) > last_low:
-                current_price = round(prices[-1], 2)
-                # 條件 3：是否已經突破頸線
+            if current_price > last_low:
                 if neckline > 0 and current_price > neckline:
                     is_formed = True
                 else:
                     is_forming = True
 
-    # 如果什麼都不是，直接丟棄
-    if not (is_forming or is_formed):
-        return ""
+    # 依照狀態給予不同的 CSS 標籤與文字
+    if is_formed:
+        status_class = "w-formed"
+        data_status = "formed"
+        tag_html = '<span class="tag-formed">🚀 已成形 (已突破頸線)</span>'
+        detail_str = f"關鍵頸線：{round(neckline, 2)}<br>右腳支撐：{round(last_low, 2)}<br>"
+    elif is_forming:
+        status_class = "w-forming"
+        data_status = "forming"
+        tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
+        detail_str = f"關鍵頸線：{round(neckline, 2)}<br>右腳支撐：{round(last_low, 2)}<br>"
+    else:
+        status_class = "w-none"
+        data_status = "none"
+        tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
+        detail_str = ""
 
-    display_title = f"{ticker.replace('.TW', '')}-{stock_name}"
-    
-    # 根據狀態決定卡片的顏色與標籤
-    status_class = "w-formed" if is_formed else "w-forming"
-    data_status = "formed" if is_formed else "forming"
-    tag_html = '<span class="tag-formed">🚀 已成形 (已突破頸線)</span>' if is_formed else '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
-    
-    neckline_str = f"關鍵頸線：{round(neckline, 2)}<br>" if neckline > 0 else ""
-    support_str = f"右腳支撐：{round(last_low, 2)}<br>"
+    # 預設先用 style 將未達標卡片隱藏，避免載入網頁時畫面閃爍
+    display_style = "display: none;" if data_status == "none" else ""
 
     card_html = f"""
-    <div class="card {status_class}" data-status="{data_status}">
-        <div class="stock-title">{display_title}</div>
+    <div class="card {status_class}" data-status="{data_status}" data-category="{category}" style="{display_style}">
+        <div class="stock-title">{display_title} <span class="stock-category">{category}</span></div>
         <div class="price-info">
             最新週收盤價：{current_price}<br>
-            {neckline_str}{support_str}
+            {detail_str}
             {tag_html}
         </div>
     </div>
@@ -174,10 +216,7 @@ if __name__ == '__main__':
             time.sleep(0.5) 
         except:
             continue
-    
-    if all_cards == "":
-        all_cards = '<div class="empty-msg">目前上市普通股中，無任何股票符合週 K 線 W 底型態。</div>'
-        
+            
     tw_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
     final_html = HTML_TEMPLATE.replace('{cards_html}', all_cards).replace('{update_time}', tw_time)
     

@@ -32,6 +32,12 @@ HTML_TEMPLATE = """
         .tag-forming { color: #d9534f; font-weight: bold; }
         .tag-formed { color: #28a745; font-weight: bold; }
         .tag-none { color: #666; font-style: italic; }
+        
+        /* 圖表按鈕與容器樣式 */
+        .chart-btn { margin-top: 10px; padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; width: 100%; }
+        .chart-btn:hover { background-color: #0056b3; }
+        .chart-container { margin-top: 15px; width: 100%; height: 350px; display: none; }
+        
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
     </style>
 </head>
@@ -77,14 +83,12 @@ HTML_TEMPLATE = """
             var matchCategory = (categoryFilter === 'all') || (category === categoryFilter);
             
             if (searchText !== "") {
-                // 有輸入搜尋文字時：只要符合文字與產業分類，連同「未達標」的股票一併顯示
                 if (matchText && matchCategory) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
                 }
             } else {
-                // 沒有搜尋文字時：預設【絕對不顯示】未達標(none)的股票，並套用狀態過濾
                 var matchStatus = false;
                 if (statusFilter === 'all' && (status === 'formed' || status === 'forming')) {
                     matchStatus = true;
@@ -101,7 +105,21 @@ HTML_TEMPLATE = """
         });
     }
     
-    // 網頁載入時自動執行一次，將未達標的卡片隱藏
+    // 動態載入 TradingView K 線圖
+    function toggleChart(stockCode) {
+        var container = document.getElementById('chart-' + stockCode);
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            // 如果 iframe 還沒被載入，就塞入 TradingView 小工具 (設定為週線 'W')
+            if (container.innerHTML.trim() === '') {
+                var symbol = 'TWSE:' + stockCode; 
+                container.innerHTML = '<iframe src="https://s.tradingview.com/widgetembed/?symbol=' + symbol + '&interval=W&hidesidetoolbar=1&symboledit=0&saveimage=1&toolbarbg=f1f3f6&theme=light&style=1&timezone=Asia%2FTaipei" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>';
+            }
+        } else {
+            container.style.display = 'none';
+        }
+    }
+    
     window.onload = filterCards;
     </script>
 </body>
@@ -125,11 +143,9 @@ def get_twse_all_stocks():
         return {}
 
 def get_category(ticker):
-    """利用股票代碼前兩碼，快速對應奇摩股市的常見大分類"""
     code = ticker.split('.')[0]
     if code.startswith('28'):
         return '金融保險股'
-    # 台股常見電子類股代碼前綴
     tech_prefixes = ('23','24','30','31','32','33','34','35','36','37','49','52','53','54','61','62','64','65','80','81','82','66','84')
     if code.startswith(tech_prefixes):
         return '電子科技股'
@@ -140,7 +156,8 @@ def analyze_stock(ticker, stock_name):
     df = stock.history(period="1y", interval="1wk")
     
     category = get_category(ticker)
-    display_title = f"{ticker.replace('.TW', '')}-{stock_name}"
+    raw_code = ticker.replace('.TW', '')
+    display_title = f"{raw_code}-{stock_name}"
     
     if df.empty or len(df) < 10:
         return "" 
@@ -173,7 +190,6 @@ def analyze_stock(ticker, stock_name):
                 else:
                     is_forming = True
 
-    # 依照狀態給予不同的 CSS 標籤與文字
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"
@@ -190,9 +206,9 @@ def analyze_stock(ticker, stock_name):
         tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
         detail_str = ""
 
-    # 預設先用 style 將未達標卡片隱藏，避免載入網頁時畫面閃爍
     display_style = "display: none;" if data_status == "none" else ""
 
+    # 加入圖表按鈕與隱藏的圖表容器 (動態展開)
     card_html = f"""
     <div class="card {status_class}" data-status="{data_status}" data-category="{category}" style="{display_style}">
         <div class="stock-title">{display_title} <span class="stock-category">{category}</span></div>
@@ -201,6 +217,8 @@ def analyze_stock(ticker, stock_name):
             {detail_str}
             {tag_html}
         </div>
+        <button class="chart-btn" onclick="toggleChart('{raw_code}')">📊 顯示/隱藏 近期週 K 線圖</button>
+        <div id="chart-{raw_code}" class="chart-container"></div>
     </div>
     """
     return card_html

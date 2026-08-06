@@ -33,9 +33,10 @@ HTML_TEMPLATE = """
         .tag-formed { color: #28a745; font-weight: bold; }
         .tag-none { color: #666; font-style: italic; }
         
-        /* 修改按鈕樣式使其像一個連結區塊 */
-        .chart-btn { display: block; margin-top: 15px; padding: 10px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; text-align: center; text-decoration: none; font-size: 0.95em; font-weight: bold; transition: background-color 0.2s; }
-        .chart-btn:hover { background-color: #0056b3; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .chart-btn { flex: 1; padding: 10px 12px; background-color: #2962FF; color: white; border: none; border-radius: 4px; text-align: center; text-decoration: none; font-size: 0.9em; font-weight: bold; transition: opacity 0.2s; }
+        .chart-btn:hover { opacity: 0.8; }
+        .chart-btn.yahoo { background-color: #720e9e; }
         
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
     </style>
@@ -192,7 +193,6 @@ def analyze_stock(ticker, stock_name):
 
     display_style = "display: none;" if data_status == "none" else ""
 
-    # 將按鈕改為 HTML 的 <a> 標籤，點擊後會在新分頁開啟 Yahoo 股市的 K 線圖
     card_html = f"""
     <div class="card {status_class}" data-status="{data_status}" data-category="{category}" style="{display_style}">
         <div class="stock-title">{display_title} <span class="stock-category">{category}</span></div>
@@ -201,7 +201,10 @@ def analyze_stock(ticker, stock_name):
             {detail_str}
             {tag_html}
         </div>
-        <a href="https://tw.stock.yahoo.com/quote/{raw_code}/ta" target="_blank" class="chart-btn">📊 前往 Yahoo 股市查看完整 K 線</a>
+        <div class="btn-group">
+            <a href="https://tw.tradingview.com/chart/?symbol=TWSE:{raw_code}" target="_blank" class="chart-btn">📊 TradingView K線</a>
+            <a href="https://tw.stock.yahoo.com/quote/{raw_code}" target="_blank" class="chart-btn yahoo">🟣 Yahoo 綜合資訊</a>
+        </div>
     </div>
     """
     return card_html

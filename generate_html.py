@@ -33,10 +33,9 @@ HTML_TEMPLATE = """
         .tag-formed { color: #28a745; font-weight: bold; }
         .tag-none { color: #666; font-style: italic; }
         
-        /* 圖表按鈕與容器樣式 */
-        .chart-btn { margin-top: 10px; padding: 8px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; width: 100%; }
+        /* 修改按鈕樣式使其像一個連結區塊 */
+        .chart-btn { display: block; margin-top: 15px; padding: 10px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; text-align: center; text-decoration: none; font-size: 0.95em; font-weight: bold; transition: background-color 0.2s; }
         .chart-btn:hover { background-color: #0056b3; }
-        .chart-container { margin-top: 15px; width: 100%; height: 350px; display: none; }
         
         .footer { text-align: center; font-size: 0.8em; color: #888; margin-top: 20px; }
     </style>
@@ -103,21 +102,6 @@ HTML_TEMPLATE = """
                 }
             }
         });
-    }
-    
-    // 動態載入 TradingView K 線圖
-    function toggleChart(stockCode) {
-        var container = document.getElementById('chart-' + stockCode);
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            // 如果 iframe 還沒被載入，就塞入 TradingView 小工具 (設定為週線 'W')
-            if (container.innerHTML.trim() === '') {
-                var symbol = 'TWSE:' + stockCode; 
-                container.innerHTML = '<iframe src="https://s.tradingview.com/widgetembed/?symbol=' + symbol + '&interval=W&hidesidetoolbar=1&symboledit=0&saveimage=1&toolbarbg=f1f3f6&theme=light&style=1&timezone=Asia%2FTaipei" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>';
-            }
-        } else {
-            container.style.display = 'none';
-        }
     }
     
     window.onload = filterCards;
@@ -208,7 +192,7 @@ def analyze_stock(ticker, stock_name):
 
     display_style = "display: none;" if data_status == "none" else ""
 
-    # 加入圖表按鈕與隱藏的圖表容器 (動態展開)
+    # 將按鈕改為 HTML 的 <a> 標籤，點擊後會在新分頁開啟 Yahoo 股市的 K 線圖
     card_html = f"""
     <div class="card {status_class}" data-status="{data_status}" data-category="{category}" style="{display_style}">
         <div class="stock-title">{display_title} <span class="stock-category">{category}</span></div>
@@ -217,8 +201,7 @@ def analyze_stock(ticker, stock_name):
             {detail_str}
             {tag_html}
         </div>
-        <button class="chart-btn" onclick="toggleChart('{raw_code}')">📊 顯示/隱藏 近期週 K 線圖</button>
-        <div id="chart-{raw_code}" class="chart-container"></div>
+        <a href="https://tw.stock.yahoo.com/quote/{raw_code}/ta" target="_blank" class="chart-btn">📊 前往 Yahoo 股市查看完整 K 線</a>
     </div>
     """
     return card_html

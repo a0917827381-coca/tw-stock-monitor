@@ -28,6 +28,7 @@ HTML_TEMPLATE = """
         
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .stock-category { font-size: 0.75em; color: #fff; background-color: #555; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+        .stock-div { background-color: #17a2b8; } /* 股息標籤使用亮藍色 */
         .price-info { color: #555; line-height: 1.6; }
         .tag-forming { color: #d9534f; font-weight: bold; }
         .tag-formed { color: #28a745; font-weight: bold; }
@@ -46,7 +47,7 @@ HTML_TEMPLATE = """
         <h1>📈 台股「週K線」W底潛力股</h1>
         
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="🔍 搜尋代碼或名稱 (未達標也會顯示)" onkeyup="filterCards()">
+            <input type="text" id="searchInput" placeholder="🔍 搜尋代碼或名稱" onkeyup="filterCards()">
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
                 <option value="電子科技股">💻 電子科技股</option>
@@ -57,6 +58,8 @@ HTML_TEMPLATE = """
                 <option value="all">📊 顯示成形與快成形</option>
                 <option value="formed">🚀 只看【已成形】</option>
                 <option value="forming">⚠️ 只看【快成形】</option>
+                <option value="formed_div3">💰 【已成形】且連3年配息</option>
+                <option value="forming_div3">💰 【快成形】且連3年配息</option>
             </select>
         </div>
 
@@ -78,6 +81,7 @@ HTML_TEMPLATE = """
             var text = card.querySelector('.stock-title').textContent.toLowerCase();
             var status = card.getAttribute('data-status');
             var category = card.getAttribute('data-category');
+            var hasDividend = card.getAttribute('data-dividend');
             
             var matchText = text.includes(searchText);
             var matchCategory = (categoryFilter === 'all') || (category === categoryFilter);
@@ -90,7 +94,13 @@ HTML_TEMPLATE = """
                 }
             } else {
                 var matchStatus = false;
-                if (statusFilter === 'all' && (status === 'formed' || status === 'forming')) {
+                
+                // 處理新增的股息複合條件
+                if (statusFilter === 'formed_div3') {
+                    if (status === 'formed' && hasDividend === 'true') matchStatus = true;
+                } else if (statusFilter === 'forming_div3') {
+                    if (status === 'forming' && hasDividend === 'true') matchStatus = true;
+                } else if (statusFilter === 'all' && (status === 'formed' || status === 'forming')) {
                     matchStatus = true;
                 } else if (status === statusFilter) {
                     matchStatus = true;
@@ -146,6 +156,20 @@ def analyze_stock(ticker, stock_name):
     
     if df.empty or len(df) < 10:
         return "" 
+        
+    # === 股息檢查邏輯 ===
+    is_dividend_3y = False
+    try:
+        dividends = stock.dividends
+        if not dividends.empty:
+            dividend_years = set(dividends.index.year)
+            current_year = datetime.datetime.now().year
+            # 檢查 2023, 2024, 2025 或是 2024, 2025, 2026 是否皆有配息紀錄
+            cond1 = all(y in dividend_years for y in [current_year-1, current_year-2, current_year-3])
+            cond2 = all(y in dividend_years for y in [current_year, current_year-1, current_year-2])
+            is_dividend_3y = cond1 or cond2
+    except:
+        pass # 若抓取失敗或無資料，預設為未連續配息
     
     prices = df['Close'].values
     local_min_idx = argrelextrema(prices, np.less, order=3)[0]
@@ -191,11 +215,14 @@ def analyze_stock(ticker, stock_name):
         tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
         detail_str = ""
 
+    # 將狀態寫入 data 屬性供 JavaScript 篩選
     display_style = "display: none;" if data_status == "none" else ""
+    data_div = "true" if is_dividend_3y else "false"
+    div_tag_html = ' <span class="stock-category stock-div">💰 連3年配息</span>' if is_dividend_3y else ""
 
     card_html = f"""
-    <div class="card {status_class}" data-status="{data_status}" data-category="{category}" style="{display_style}">
-        <div class="stock-title">{display_title} <span class="stock-category">{category}</span></div>
+    <div class="card {status_class}" data-status="{data_status}" data-category="{category}" data-dividend="{data_div}" style="{display_style}">
+        <div class="stock-title">{display_title} <span class="stock-category">{category}</span>{div_tag_html}</div>
         <div class="price-info">
             最新週收盤價：{current_price}<br>
             {detail_str}

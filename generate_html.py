@@ -18,8 +18,11 @@ HTML_TEMPLATE = """
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #333; font-size: 1.5em; }
         
-        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filters { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .filters input, .filters select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; flex: 1; min-width: 140px; }
+        
+        /* 數量統計條的樣式 */
+        .result-count { background-color: #e9ecef; color: #007bff; text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; }
         
         .card { border-left: 5px solid #ccc; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 5px; display: block; }
         .card.w-forming { border-left-color: #ffc107; background: #fff8e1; } 
@@ -28,7 +31,7 @@ HTML_TEMPLATE = """
         
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .stock-category { font-size: 0.75em; color: #fff; background-color: #555; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
-        .stock-div { background-color: #17a2b8; } /* 股息標籤使用亮藍色 */
+        .stock-div { background-color: #17a2b8; }
         .price-info { color: #555; line-height: 1.6; }
         .tag-forming { color: #d9534f; font-weight: bold; }
         .tag-formed { color: #28a745; font-weight: bold; }
@@ -62,6 +65,9 @@ HTML_TEMPLATE = """
                 <option value="forming_div3">💰 【快成形】且連3年配息</option>
             </select>
         </div>
+        
+        <!-- 新增的數量統計顯示區 -->
+        <div id="resultCount" class="result-count">💡 正在計算符合條件的標的...</div>
 
         <div id="cardContainer">
             {cards_html}
@@ -77,6 +83,8 @@ HTML_TEMPLATE = """
         var categoryFilter = document.getElementById('categoryFilter').value;
         var cards = document.querySelectorAll('.card');
         
+        var visibleCount = 0; // 歸零計數器
+        
         cards.forEach(function(card) {
             var text = card.querySelector('.stock-title').textContent.toLowerCase();
             var status = card.getAttribute('data-status');
@@ -86,16 +94,14 @@ HTML_TEMPLATE = """
             var matchText = text.includes(searchText);
             var matchCategory = (categoryFilter === 'all') || (category === categoryFilter);
             
+            var isVisible = false; // 先預設這張卡片不可見
+            
             if (searchText !== "") {
                 if (matchText && matchCategory) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+                    isVisible = true;
                 }
             } else {
                 var matchStatus = false;
-                
-                // 處理新增的股息複合條件
                 if (statusFilter === 'formed_div3') {
                     if (status === 'formed' && hasDividend === 'true') matchStatus = true;
                 } else if (statusFilter === 'forming_div3') {
@@ -107,14 +113,24 @@ HTML_TEMPLATE = """
                 }
                 
                 if (matchStatus && matchCategory) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+                    isVisible = true;
                 }
             }
+            
+            // 根據判斷結果顯示/隱藏卡片，並累加計數
+            if (isVisible) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
         });
+        
+        // 更新網頁上方的文字
+        document.getElementById('resultCount').textContent = '💡 符合此搜尋條件的有 ' + visibleCount + ' 檔';
     }
     
+    // 網頁載入時立刻計算一次
     window.onload = filterCards;
     </script>
 </body>
@@ -157,19 +173,17 @@ def analyze_stock(ticker, stock_name):
     if df.empty or len(df) < 10:
         return "" 
         
-    # === 股息檢查邏輯 ===
     is_dividend_3y = False
     try:
         dividends = stock.dividends
         if not dividends.empty:
             dividend_years = set(dividends.index.year)
             current_year = datetime.datetime.now().year
-            # 檢查 2023, 2024, 2025 或是 2024, 2025, 2026 是否皆有配息紀錄
             cond1 = all(y in dividend_years for y in [current_year-1, current_year-2, current_year-3])
             cond2 = all(y in dividend_years for y in [current_year, current_year-1, current_year-2])
             is_dividend_3y = cond1 or cond2
     except:
-        pass # 若抓取失敗或無資料，預設為未連續配息
+        pass
     
     prices = df['Close'].values
     local_min_idx = argrelextrema(prices, np.less, order=3)[0]
@@ -215,7 +229,6 @@ def analyze_stock(ticker, stock_name):
         tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
         detail_str = ""
 
-    # 將狀態寫入 data 屬性供 JavaScript 篩選
     display_style = "display: none;" if data_status == "none" else ""
     data_div = "true" if is_dividend_3y else "false"
     div_tag_html = ' <span class="stock-category stock-div">💰 連3年配息</span>' if is_dividend_3y else ""

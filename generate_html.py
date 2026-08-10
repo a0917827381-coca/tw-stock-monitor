@@ -21,7 +21,6 @@ HTML_TEMPLATE = """
         .filters { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .filters input, .filters select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; flex: 1; min-width: 140px; }
         
-        /* 數量統計條的樣式 */
         .result-count { background-color: #e9ecef; color: #007bff; text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 1.1em; margin-bottom: 15px; }
         
         .card { border-left: 5px solid #ccc; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 5px; display: block; }
@@ -32,6 +31,9 @@ HTML_TEMPLATE = """
         .stock-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
         .stock-category { font-size: 0.75em; color: #fff; background-color: #555; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
         .stock-div { background-color: #17a2b8; }
+        .strict-tag { background-color: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 5px; }
+        .loose-tag { background-color: #fd7e14; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 5px; }
+        
         .price-info { color: #555; line-height: 1.6; }
         .tag-forming { color: #d9534f; font-weight: bold; }
         .tag-formed { color: #28a745; font-weight: bold; }
@@ -51,6 +53,11 @@ HTML_TEMPLATE = """
         
         <div class="filters">
             <input type="text" id="searchInput" placeholder="🔍 搜尋代碼或名稱" onkeyup="filterCards()">
+            <select id="strictFilter" onchange="filterCards()">
+                <option value="all">🎯 所有型態判定條件</option>
+                <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高5~15%)</option>
+            </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
                 <option value="電子科技股">💻 電子科技股</option>
@@ -66,7 +73,6 @@ HTML_TEMPLATE = """
             </select>
         </div>
         
-        <!-- 新增的數量統計顯示區 -->
         <div id="resultCount" class="result-count">💡 正在計算符合條件的標的...</div>
 
         <div id="cardContainer">
@@ -80,28 +86,32 @@ HTML_TEMPLATE = """
     function filterCards() {
         var searchText = document.getElementById('searchInput').value.toLowerCase().trim();
         var statusFilter = document.getElementById('statusFilter').value;
+        var strictFilter = document.getElementById('strictFilter').value;
         var categoryFilter = document.getElementById('categoryFilter').value;
         var cards = document.querySelectorAll('.card');
         
-        var visibleCount = 0; // 歸零計數器
+        var visibleCount = 0;
         
         cards.forEach(function(card) {
             var text = card.querySelector('.stock-title').textContent.toLowerCase();
             var status = card.getAttribute('data-status');
+            var strictness = card.getAttribute('data-strictness');
             var category = card.getAttribute('data-category');
             var hasDividend = card.getAttribute('data-dividend');
             
             var matchText = text.includes(searchText);
+            var matchStrict = (strictFilter === 'all') || (strictness === strictFilter);
             var matchCategory = (categoryFilter === 'all') || (category === categoryFilter);
             
-            var isVisible = false; // 先預設這張卡片不可見
+            var isVisible = false;
             
             if (searchText !== "") {
-                if (matchText && matchCategory) {
+                if (matchText && matchStrict && matchCategory) {
                     isVisible = true;
                 }
             } else {
                 var matchStatus = false;
+                
                 if (statusFilter === 'formed_div3') {
                     if (status === 'formed' && hasDividend === 'true') matchStatus = true;
                 } else if (statusFilter === 'forming_div3') {
@@ -112,12 +122,11 @@ HTML_TEMPLATE = """
                     matchStatus = true;
                 }
                 
-                if (matchStatus && matchCategory) {
+                if (matchStatus && matchStrict && matchCategory && status !== 'none') {
                     isVisible = true;
                 }
             }
             
-            // 根據判斷結果顯示/隱藏卡片，並累加計數
             if (isVisible) {
                 card.style.display = 'block';
                 visibleCount++;
@@ -126,11 +135,9 @@ HTML_TEMPLATE = """
             }
         });
         
-        // 更新網頁上方的文字
         document.getElementById('resultCount').textContent = '💡 符合此搜尋條件的有 ' + visibleCount + ' 檔';
     }
     
-    // 網頁載入時立刻計算一次
     window.onload = filterCards;
     </script>
 </body>
@@ -149,8 +156,7 @@ def get_twse_all_stocks():
             if len(code) == 4 and code.isdigit():
                 stock_dict[f"{code}.TW"] = name
         return stock_dict
-    except Exception as e:
-        print(f"抓取清單失敗: {e}")
+    except:
         return {}
 
 def get_category(ticker):
@@ -164,7 +170,8 @@ def get_category(ticker):
 
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
-    df = stock.history(period="1y", interval="1wk")
+    # 使用還原權息 (auto_adjust=True)
+    df = stock.history(period="1y", interval="1wk", auto_adjust=True)
     
     category = get_category(ticker)
     raw_code = ticker.replace('.TW', '')
@@ -173,6 +180,7 @@ def analyze_stock(ticker, stock_name):
     if df.empty or len(df) < 10:
         return "" 
         
+    # 配息邏輯加回來了
     is_dividend_3y = False
     try:
         dividends = stock.dividends
@@ -186,12 +194,13 @@ def analyze_stock(ticker, stock_name):
         pass
     
     prices = df['Close'].values
-    local_min_idx = argrelextrema(prices, np.less, order=3)[0]
+    local_min_idx = argrelextrema(prices, np.less, order=2)[0]
     
     is_forming = False
     is_formed = False
     neckline = 0
     last_low = 0
+    strictness = "none"
     current_price = round(prices[-1], 2)
 
     if len(local_min_idx) >= 2:
@@ -206,39 +215,49 @@ def analyze_stock(ticker, stock_name):
             if len(between_prices) > 0:
                 neckline = np.max(between_prices)
                 
-        if abs(last_low - prev_low) / prev_low < 0.05:
-            if current_price > last_low:
-                if neckline > 0 and current_price > neckline:
-                    is_formed = True
-                else:
-                    is_forming = True
+        diff = abs(last_low - prev_low) / prev_low
+        
+        if diff <= 0.05:
+            strictness = "strict"
+        elif diff <= 0.15 and current_price > last_low:
+            strictness = "loose"
+            
+        if strictness != "none" and current_price > last_low:
+            if neckline > 0 and current_price > neckline:
+                is_formed = True
+            else:
+                is_forming = True
 
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"
         tag_html = '<span class="tag-formed">🚀 已成形 (已突破頸線)</span>'
-        detail_str = f"關鍵頸線：{round(neckline, 2)}<br>右腳支撐：{round(last_low, 2)}<br>"
     elif is_forming:
         status_class = "w-forming"
         data_status = "forming"
         tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
-        detail_str = f"關鍵頸線：{round(neckline, 2)}<br>右腳支撐：{round(last_low, 2)}<br>"
     else:
         status_class = "w-none"
         data_status = "none"
         tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
-        detail_str = ""
+
+    strict_html = ""
+    if strictness == "strict":
+        strict_html = '<span class="strict-tag">🔒 標準嚴格</span>'
+    elif strictness == "loose":
+        strict_html = '<span class="loose-tag">🔥 強勢寬鬆</span>'
 
     display_style = "display: none;" if data_status == "none" else ""
     data_div = "true" if is_dividend_3y else "false"
     div_tag_html = ' <span class="stock-category stock-div">💰 連3年配息</span>' if is_dividend_3y else ""
 
     card_html = f"""
-    <div class="card {status_class}" data-status="{data_status}" data-category="{category}" data-dividend="{data_div}" style="{display_style}">
-        <div class="stock-title">{display_title} <span class="stock-category">{category}</span>{div_tag_html}</div>
+    <div class="card {status_class}" data-status="{data_status}" data-strictness="{strictness}" data-category="{category}" data-dividend="{data_div}" style="{display_style}">
+        <div class="stock-title">{display_title} <span class="stock-category">{category}</span>{strict_html}{div_tag_html}</div>
         <div class="price-info">
             最新週收盤價：{current_price}<br>
-            {detail_str}
+            關鍵頸線：{round(neckline, 2) if neckline > 0 else '無'}<br>
+            右腳支撐：{round(last_low, 2)}<br>
             {tag_html}
         </div>
         <div class="btn-group">

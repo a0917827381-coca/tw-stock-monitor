@@ -57,7 +57,7 @@ HTML_TEMPLATE = """
             <select id="strictFilter" onchange="filterCards()">
                 <option value="all">🎯 所有型態判定條件</option>
                 <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
-                <option value="loose">🔥 只看【強勢寬鬆】(破底與墊高皆容許25%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(破底與墊高皆容許35%)</option>
             </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
@@ -173,14 +173,14 @@ def get_category(ticker):
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", interval="1wk", auto_adjust=True)
-    # 🧹 加上這行：剔除所有缺少收盤價的「空包彈」髒資料
+    
+    # 清洗空包彈資料
     df = df.dropna(subset=['Close'])
     
     category = get_category(ticker)
     raw_code = ticker.replace('.TW', '')
     display_title = f"{raw_code}-{stock_name}"
     
-    # 確保有足夠長度的 K 線 (至少 30 週) 來尋找左腳
     if df.empty or len(df) < 30: 
         return "" 
         
@@ -199,20 +199,15 @@ def analyze_stock(ticker, stock_name):
     prices = df['Close'].values
     current_price = round(prices[-1], 2)
     
-    # ---------------- 核心邏輯重構 ----------------
-    
-    # 1. 定義右腳：最近 8 週內的絕對最低點
     right_window = prices[-8:]
     right_foot_local_idx = np.argmin(right_window)
     right_low_idx = len(prices) - 8 + right_foot_local_idx
     right_low = prices[right_low_idx]
     
-    # 🛡️ 盲區二防護：防死魚機制 (現價必須比右腳最低點高出至少 3%)
-    # 如果還趴在地上不動，直接過濾掉
+    # 1.5% 防死魚機制
     if current_price < right_low * 1.015:
         return ""
         
-    # 2. 定義左腳：過去 8 週到 30 週之間的大谷底 (過濾遠古歷史與微小雜訊)
     left_window_start = len(prices) - 30
     left_window_end = len(prices) - 8
     left_window = prices[left_window_start:left_window_end]
@@ -220,40 +215,39 @@ def analyze_stock(ticker, stock_name):
     left_low_idx = left_window_start + left_foot_local_idx
     left_low = prices[left_low_idx]
     
-    # 3. 計算落差比例與死線防護
     diff_ratio = (right_low - left_low) / left_low
     
-    # 🛡️ 盲區二防護：絕對死線 (跌幅超過 35% 的無底洞直接放棄)
+    # 35% 破底防護極限
     if diff_ratio < -0.35 or diff_ratio > 0.35:
         return ""
         
     if -0.05 <= diff_ratio <= 0.05:
         strictness = "strict"
-    elif -0.35 <= diff_ratio <= 0.35:        
+    elif -0.35 <= diff_ratio <= 0.35:
         strictness = "loose"
         
-    # 4. 定義頸線：兩腳之間「最靠近右腳」的實質反彈高點
     between_prices = prices[left_low_idx:right_low_idx]
     if len(between_prices) == 0:
         return ""
         
     local_max_idx = argrelextrema(between_prices, np.greater, order=1)[0]
     if len(local_max_idx) > 0:
-        neckline = between_prices[local_max_idx[-1]] # 取最後一個反彈高點
+        neckline = between_prices[local_max_idx[-1]] 
     else:
         neckline = np.max(between_prices)
         
-    # 5. 狀態判定
+    # 🛡️ 喜馬拉雅山頸線防護 (大於35%無肉直接淘汰)
+    if (neckline - right_low) / right_low > 0.35:
+        return ""
+        
     is_formed = False
     is_forming = False
     
     if current_price > neckline:
         is_formed = True
     else:
-        # 只要能走到這一步，且沒有突破頸線，就是完美的快成形
         is_forming = True
 
-    # ---------------- HTML 生成 ----------------
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"

@@ -205,16 +205,28 @@ def analyze_stock(ticker, stock_name):
     strictness = "none"
     current_price = round(prices[-1], 2)
 
-    if len(local_min_idx) >= 2:
+if len(local_min_idx) >= 2:
         last_low_idx = local_min_idx[-1]
-        prev_low_idx = local_min_idx[-2]
         
+        # 條件 1：右腳必須發生在最近 8 週內（時效性）
         if (len(prices) - 1 - last_low_idx) > 8:
+            return ""
+            
+        # 條件 2：往前尋找真正的左腳！兩腳之間強制要求「至少相隔 4 週 (約 1 個月)」，過濾中途洗盤雜訊
+        prev_low_idx = None
+        for idx in reversed(local_min_idx[:-1]):
+            if (last_low_idx - idx) >= 4:
+                prev_low_idx = idx
+                break
+                
+        # 如果找不到相隔 4 週以上的低點，代表 W 底結構尚未完整
+        if prev_low_idx is None:
             return ""
             
         last_low = prices[last_low_idx]
         prev_low = prices[prev_low_idx]
         
+        # 尋找兩腳之間的最高點作為頸線
         if prev_low_idx < last_low_idx:
             between_prices = prices[prev_low_idx:last_low_idx+1]
             if len(between_prices) > 0:
@@ -222,9 +234,9 @@ def analyze_stock(ticker, stock_name):
                 
         diff_ratio = (last_low - prev_low) / prev_low
         
+        # 容忍右腳破底 25% (捕捉極端洗盤)，最高墊高 25%
         if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
-        # ⚠️ 這裡保留了你上一回合針對「晶豪科」破底翻修正的 -0.15 寬鬆標準
         elif -0.25 <= diff_ratio <= 0.25:
             strictness = "loose"
             

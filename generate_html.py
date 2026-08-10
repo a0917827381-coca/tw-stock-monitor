@@ -56,7 +56,7 @@ HTML_TEMPLATE = """
             <select id="strictFilter" onchange="filterCards()">
                 <option value="all">🎯 所有型態判定條件</option>
                 <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
-                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高5~15%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高最高25%)</option>
             </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
@@ -170,7 +170,6 @@ def get_category(ticker):
 
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
-    # 使用還原權息 (auto_adjust=True)
     df = stock.history(period="1y", interval="1wk", auto_adjust=True)
     
     category = get_category(ticker)
@@ -180,7 +179,6 @@ def analyze_stock(ticker, stock_name):
     if df.empty or len(df) < 10:
         return "" 
         
-    # 配息邏輯加回來了
     is_dividend_3y = False
     try:
         dividends = stock.dividends
@@ -217,9 +215,10 @@ def analyze_stock(ticker, stock_name):
                 
         diff = abs(last_low - prev_low) / prev_low
         
+        # ⚠️ 這裡將容許誤差大幅放寬至 25% (0.25)
         if diff <= 0.05:
             strictness = "strict"
-        elif diff <= 0.15 and current_price > last_low:
+        elif diff <= 0.25 and current_price > last_low:
             strictness = "loose"
             
         if strictness != "none" and current_price > last_low:

@@ -56,7 +56,7 @@ HTML_TEMPLATE = """
             <select id="strictFilter" onchange="filterCards()">
                 <option value="all">🎯 所有型態判定條件</option>
                 <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
-                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高最高25%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高最多25%)</option>
             </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
@@ -148,7 +148,7 @@ def get_twse_all_stocks():
     url = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
     stock_dict = {}
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         data = response.json()
         for item in data:
             code = item['Code']
@@ -156,7 +156,8 @@ def get_twse_all_stocks():
             if len(code) == 4 and code.isdigit():
                 stock_dict[f"{code}.TW"] = name
         return stock_dict
-    except:
+    except Exception as e:
+        print(f"獲取台股列表失敗: {e}")
         return {}
 
 def get_category(ticker):
@@ -192,7 +193,9 @@ def analyze_stock(ticker, stock_name):
         pass
     
     prices = df['Close'].values
-    local_min_idx = argrelextrema(prices, np.less, order=2)[0]
+    
+    # 修改1：將 order 改為 1，提高對剛成形低點的捕捉能力
+    local_min_idx = argrelextrema(prices, np.less, order=1)[0]
     
     is_forming = False
     is_formed = False
@@ -205,6 +208,10 @@ def analyze_stock(ticker, stock_name):
         last_low_idx = local_min_idx[-1]
         prev_low_idx = local_min_idx[-2]
         
+        # 修改2：限制最新低點（右腳）必須在最近 8 週內出現，避免抓到遠古 W 底
+        if (len(prices) - 1 - last_low_idx) > 8:
+            return ""
+            
         last_low = prices[last_low_idx]
         prev_low = prices[prev_low_idx]
         
@@ -213,18 +220,20 @@ def analyze_stock(ticker, stock_name):
             if len(between_prices) > 0:
                 neckline = np.max(between_prices)
                 
-        diff = abs(last_low - prev_low) / prev_low
+        # 修改3：計算落差比例，並區分跌破（負值）與墊高（正值）
+        diff_ratio = (last_low - prev_low) / prev_low
         
-        # ⚠️ 這裡將容許誤差大幅放寬至 25% (0.25)
-        if diff <= 0.05:
+        # 允許跌破 5% 到墊高 5% 之間為「嚴謹」
+        if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
-        elif diff <= 0.25 and current_price > last_low:
+        # 允許跌破 5% 內，但右腳墊高最高至 25% 皆視為「寬鬆」
+        elif -0.05 <= diff_ratio <= 0.25:
             strictness = "loose"
             
-        if strictness != "none" and current_price > last_low:
+        if strictness != "none":
             if neckline > 0 and current_price > neckline:
                 is_formed = True
-            else:
+            elif current_price > last_low: # 右腳已經確立反彈
                 is_forming = True
 
     if is_formed:
@@ -236,9 +245,7 @@ def analyze_stock(ticker, stock_name):
         data_status = "forming"
         tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
     else:
-        status_class = "w-none"
-        data_status = "none"
-        tag_html = '<span class="tag-none">❌ 此股票目前未達 W 底標準</span>'
+        return "" # 若未達 W 底標準，直接略過不回傳 HTML 以節省頁面資源
 
     strict_html = ""
     if strictness == "strict":
@@ -246,7 +253,7 @@ def analyze_stock(ticker, stock_name):
     elif strictness == "loose":
         strict_html = '<span class="loose-tag">🔥 強勢寬鬆</span>'
 
-    display_style = "display: none;" if data_status == "none" else ""
+    display_style = ""
     data_div = "true" if is_dividend_3y else "false"
     div_tag_html = ' <span class="stock-category stock-div">💰 連3年配息</span>' if is_dividend_3y else ""
 
@@ -274,9 +281,13 @@ if __name__ == '__main__':
     all_cards = ""
     for ticker, name in watch_items:
         try:
-            all_cards += analyze_stock(ticker, name)
+            card = analyze_stock(ticker, name)
+            if card:
+                all_cards += card
             time.sleep(0.5) 
-        except:
+        except Exception as e:
+            # 修改4：將錯誤印出而不是靜默吃掉，如果哪一檔卡住可以在 Console 看到原因
+            print(f"處理 {ticker} 時發生錯誤: {e}")
             continue
             
     tw_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')

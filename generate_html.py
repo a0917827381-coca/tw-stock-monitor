@@ -5,6 +5,7 @@ import numpy as np
 import datetime
 import requests
 import time
+import concurrent.futures  # 🚀 新增：多執行緒模組
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -170,6 +171,7 @@ def get_category(ticker):
     return '傳統產業與其他'
 
 def analyze_stock(ticker, stock_name):
+    # 關閉 yfinance 擾人的錯誤輸出，保持終端機乾淨
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", interval="1wk", auto_adjust=True)
     
@@ -194,7 +196,6 @@ def analyze_stock(ticker, stock_name):
     
     prices = df['Close'].values
     
-    # 修改1：將 order 改為 1，提高對剛成形低點的捕捉能力
     local_min_idx = argrelextrema(prices, np.less, order=1)[0]
     
     is_forming = False
@@ -208,7 +209,6 @@ def analyze_stock(ticker, stock_name):
         last_low_idx = local_min_idx[-1]
         prev_low_idx = local_min_idx[-2]
         
-        # 修改2：限制最新低點（右腳）必須在最近 8 週內出現，避免抓到遠古 W 底
         if (len(prices) - 1 - last_low_idx) > 8:
             return ""
             
@@ -220,20 +220,18 @@ def analyze_stock(ticker, stock_name):
             if len(between_prices) > 0:
                 neckline = np.max(between_prices)
                 
-        # 修改3：計算落差比例，並區分跌破（負值）與墊高（正值）
         diff_ratio = (last_low - prev_low) / prev_low
         
-        # 允許跌破 5% 到墊高 5% 之間為「嚴謹」
         if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
-        # 允許跌破 5% 內，但右腳墊高最高至 25% 皆視為「寬鬆」
+        # ⚠️ 這裡保留了你上一回合針對「晶豪科」破底翻修正的 -0.15 寬鬆標準
         elif -0.15 <= diff_ratio <= 0.25:
             strictness = "loose"
             
         if strictness != "none":
             if neckline > 0 and current_price > neckline:
                 is_formed = True
-            elif current_price > last_low: # 右腳已經確立反彈
+            elif current_price > last_low: 
                 is_forming = True
 
     if is_formed:
@@ -245,7 +243,7 @@ def analyze_stock(ticker, stock_name):
         data_status = "forming"
         tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
     else:
-        return "" # 若未達 W 底標準，直接略過不回傳 HTML 以節省頁面資源
+        return "" 
 
     strict_html = ""
     if strictness == "strict":
@@ -279,19 +277,48 @@ if __name__ == '__main__':
     watch_items = list(watch_list.items())
     
     all_cards = ""
-    for ticker, name in watch_items:
-        try:
-            card = analyze_stock(ticker, name)
-            if card:
-                all_cards += card
-            time.sleep(0.5) 
-        except Exception as e:
-            # 修改4：將錯誤印出而不是靜默吃掉，如果哪一檔卡住可以在 Console 看到原因
-            print(f"處理 {ticker} 時發生錯誤: {e}")
-            continue
-            
+    failed_items = [] 
+    
+    print(f"🚀 啟動多執行緒加速掃描，共 {len(watch_items)} 檔...")
+    start_time = time.time()
+    
+    # 🚀 這裡就是核心魔法：開啟 10 個工人 (workers) 同時去下載資料
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # 將所有股票派發給工人
+        future_to_ticker = {executor.submit(analyze_stock, ticker, name): (ticker, name) for ticker, name in watch_items}
+        
+        # 收集結果
+        for future in concurrent.futures.as_completed(future_to_ticker):
+            ticker, name = future_to_ticker[future]
+            try:
+                card = future.result()
+                if card:
+                    all_cards += card
+            except Exception as e:
+                failed_items.append((ticker, name))
+
+    # 第二階段：對失敗清單進行「單線程」緩慢補救，避免被鎖
+    if failed_items:
+        print(f"\n⚠️ 第一階段有 {len(failed_items)} 檔下載失敗，暫停 5 秒後進入單線程補考...")
+        time.sleep(5) 
+        
+        for ticker, name in failed_items:
+            try:
+                card = analyze_stock(ticker, name)
+                if card:
+                    all_cards += card
+                time.sleep(1.0) # 補考時放慢腳步
+            except Exception as e:
+                print(f"❌ 補救失敗，徹底放棄 [{ticker} {name}]")
+                continue
+
+    end_time = time.time()
+    minutes, seconds = divmod(end_time - start_time, 60)
+    
     tw_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
     final_html = HTML_TEMPLATE.replace('{cards_html}', all_cards).replace('{update_time}', tw_time)
     
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(final_html)
+        
+    print(f"\n✅ 掃描完成！總耗時：{int(minutes)} 分 {int(seconds)} 秒，儀表板已更新至 index.html")

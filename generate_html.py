@@ -209,7 +209,7 @@ def analyze_stock(ticker, stock_name):
     
     # 🛡️ 盲區二防護：防死魚機制 (現價必須比右腳最低點高出至少 3%)
     # 如果還趴在地上不動，直接過濾掉
-    if current_price < right_low * 1.03:
+    if current_price < right_low * 1.015:
         return ""
         
     # 2. 定義左腳：過去 8 週到 30 週之間的大谷底 (過濾遠古歷史與微小雜訊)
@@ -223,13 +223,13 @@ def analyze_stock(ticker, stock_name):
     # 3. 計算落差比例與死線防護
     diff_ratio = (right_low - left_low) / left_low
     
-    # 🛡️ 盲區二防護：絕對死線 (跌幅超過 25% 的無底洞直接放棄)
-    if diff_ratio < -0.25 or diff_ratio > 0.25:
+    # 🛡️ 盲區二防護：絕對死線 (跌幅超過 35% 的無底洞直接放棄)
+    if diff_ratio < -0.35 or diff_ratio > 0.35:
         return ""
         
     if -0.05 <= diff_ratio <= 0.05:
         strictness = "strict"
-    else:
+    elif -0.35 <= diff_ratio <= 0.35:        
         strictness = "loose"
         
     # 4. 定義頸線：兩腳之間「最靠近右腳」的實質反彈高點

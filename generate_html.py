@@ -178,7 +178,7 @@ def analyze_stock(ticker, stock_name):
     raw_code = ticker.replace('.TW', '')
     display_title = f"{raw_code}-{stock_name}"
     
-    if df.empty or len(df) < 10:
+    if df.empty or len(df) < 20: # 確保有足夠長度的K線
         return "" 
         
     is_dividend_3y = False
@@ -194,57 +194,61 @@ def analyze_stock(ticker, stock_name):
         pass
     
     prices = df['Close'].values
-    
-    local_min_idx = argrelextrema(prices, np.less, order=1)[0]
-    
-    is_forming = False
-    is_formed = False
-    neckline = 0
-    last_low = 0
-    strictness = "none"
     current_price = round(prices[-1], 2)
+    
+    # --- 新邏輯 1：不看未來，直接抓最近 8 週內的絕對最低點當作右腳 ---
+    recent_8_weeks = prices[-8:]
+    right_foot_local_idx = np.argmin(recent_8_weeks)
+    last_low_idx = len(prices) - 8 + right_foot_local_idx
+    last_low = prices[last_low_idx]
+    
+    # 尋找左腳 (從過去的 V 型低點中尋找)
+    local_min_idx = argrelextrema(prices, np.less, order=1)[0]
+    prev_low_idx = None
+    
+    # 條件 2：往回找相隔至少 4 週的左腳
+    for idx in reversed(local_min_idx):
+        if (last_low_idx - idx) >= 4:
+            prev_low_idx = idx
+            break
+            
+    # 找不到符合時間跨度的左腳，代表尚未打底完成
+    if prev_low_idx is None:
+        return ""
+        
+    prev_low = prices[prev_low_idx]
+    
+    # --- 新邏輯 2：降低頸線，只抓兩腳之間「最靠近右腳的那次反彈高點」 ---
+    between_prices = prices[prev_low_idx:last_low_idx]
+    neckline = 0
+    if len(between_prices) > 0:
+        local_max_idx = argrelextrema(between_prices, np.greater, order=1)[0]
+        if len(local_max_idx) > 0:
+            # 抓取最後一個出現的高點 (最靠近右腳的反彈壓制點)
+            neckline = between_prices[local_max_idx[-1]]
+        else:
+            # 如果期間連反彈都沒有，只好抓這段的最高價
+            neckline = np.max(between_prices)
+            
+    diff_ratio = (last_low - prev_low) / prev_low
+    strictness = "none"
+    
+    # 容忍破底與墊高皆至 25%
+    if -0.05 <= diff_ratio <= 0.05:
+        strictness = "strict"
+    elif -0.25 <= diff_ratio <= 0.25:
+        strictness = "loose"
+        
+    is_formed = False
+    is_forming = False
+        
+    if strictness != "none":
+        if neckline > 0 and current_price > neckline:
+            is_formed = True
+        elif current_price > last_low: 
+            # 只要現價大於最低點，且確認有微幅反彈，就列入快成形
+            is_forming = True
 
-    if len(local_min_idx) >= 2:
-        last_low_idx = local_min_idx[-1]
-        
-        # 條件 1：右腳必須發生在最近 8 週內
-        if (len(prices) - 1 - last_low_idx) > 8:
-            return ""
-            
-        # 條件 2：往回找相隔至少 4 週的左腳 (過濾中間微小洗盤)
-        prev_low_idx = None
-        for idx in reversed(local_min_idx[:-1]):
-            if (last_low_idx - idx) >= 4:
-                prev_low_idx = idx
-                break
-                
-        # 找不到符合時間跨度的左腳，代表尚未打底完成
-        if prev_low_idx is None:
-            return ""
-            
-        last_low = prices[last_low_idx]
-        prev_low = prices[prev_low_idx]
-        
-        if prev_low_idx < last_low_idx:
-            between_prices = prices[prev_low_idx:last_low_idx+1]
-            if len(between_prices) > 0:
-                neckline = np.max(between_prices)
-                
-        diff_ratio = (last_low - prev_low) / prev_low
-        
-        # 容忍破底與墊高皆至 25%
-        if -0.05 <= diff_ratio <= 0.05:
-            strictness = "strict"
-        elif -0.25 <= diff_ratio <= 0.25:
-            strictness = "loose"
-            
-        if strictness != "none":
-            if neckline > 0 and current_price > neckline:
-                is_formed = True
-            elif current_price > last_low: 
-                is_forming = True
-
-    # 確保這一區塊的縮排為第一層，完美對齊
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"

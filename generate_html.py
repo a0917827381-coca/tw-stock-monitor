@@ -5,7 +5,7 @@ import numpy as np
 import datetime
 import requests
 import time
-import concurrent.futures  # 🚀 新增：多執行緒模組
+import concurrent.futures
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -57,7 +57,7 @@ HTML_TEMPLATE = """
             <select id="strictFilter" onchange="filterCards()">
                 <option value="all">🎯 所有型態判定條件</option>
                 <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
-                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高最多25%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(破底與墊高皆容許25%)</option>
             </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
@@ -171,7 +171,6 @@ def get_category(ticker):
     return '傳統產業與其他'
 
 def analyze_stock(ticker, stock_name):
-    # 關閉 yfinance 擾人的錯誤輸出，保持終端機乾淨
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", interval="1wk", auto_adjust=True)
     
@@ -205,28 +204,27 @@ def analyze_stock(ticker, stock_name):
     strictness = "none"
     current_price = round(prices[-1], 2)
 
-if len(local_min_idx) >= 2:
+    if len(local_min_idx) >= 2:
         last_low_idx = local_min_idx[-1]
         
-        # 條件 1：右腳必須發生在最近 8 週內（時效性）
+        # 條件 1：右腳必須發生在最近 8 週內
         if (len(prices) - 1 - last_low_idx) > 8:
             return ""
             
-        # 條件 2：往前尋找真正的左腳！兩腳之間強制要求「至少相隔 4 週 (約 1 個月)」，過濾中途洗盤雜訊
+        # 條件 2：往回找相隔至少 4 週的左腳 (過濾中間微小洗盤)
         prev_low_idx = None
         for idx in reversed(local_min_idx[:-1]):
             if (last_low_idx - idx) >= 4:
                 prev_low_idx = idx
                 break
                 
-        # 如果找不到相隔 4 週以上的低點，代表 W 底結構尚未完整
+        # 找不到符合時間跨度的左腳，代表尚未打底完成
         if prev_low_idx is None:
             return ""
             
         last_low = prices[last_low_idx]
         prev_low = prices[prev_low_idx]
         
-        # 尋找兩腳之間的最高點作為頸線
         if prev_low_idx < last_low_idx:
             between_prices = prices[prev_low_idx:last_low_idx+1]
             if len(between_prices) > 0:
@@ -234,7 +232,7 @@ if len(local_min_idx) >= 2:
                 
         diff_ratio = (last_low - prev_low) / prev_low
         
-        # 容忍右腳破底 25% (捕捉極端洗盤)，最高墊高 25%
+        # 容忍破底與墊高皆至 25%
         if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
         elif -0.25 <= diff_ratio <= 0.25:
@@ -246,6 +244,7 @@ if len(local_min_idx) >= 2:
             elif current_price > last_low: 
                 is_forming = True
 
+    # 確保這一區塊的縮排為第一層，完美對齊
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"
@@ -294,12 +293,9 @@ if __name__ == '__main__':
     print(f"🚀 啟動多執行緒加速掃描，共 {len(watch_items)} 檔...")
     start_time = time.time()
     
-    # 🚀 這裡就是核心魔法：開啟 10 個工人 (workers) 同時去下載資料
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        # 將所有股票派發給工人
         future_to_ticker = {executor.submit(analyze_stock, ticker, name): (ticker, name) for ticker, name in watch_items}
         
-        # 收集結果
         for future in concurrent.futures.as_completed(future_to_ticker):
             ticker, name = future_to_ticker[future]
             try:
@@ -309,7 +305,6 @@ if __name__ == '__main__':
             except Exception as e:
                 failed_items.append((ticker, name))
 
-    # 第二階段：對失敗清單進行「單線程」緩慢補救，避免被鎖
     if failed_items:
         print(f"\n⚠️ 第一階段有 {len(failed_items)} 檔下載失敗，暫停 5 秒後進入單線程補考...")
         time.sleep(5) 
@@ -319,7 +314,7 @@ if __name__ == '__main__':
                 card = analyze_stock(ticker, name)
                 if card:
                     all_cards += card
-                time.sleep(1.0) # 補考時放慢腳步
+                time.sleep(1.0) 
             except Exception as e:
                 print(f"❌ 補救失敗，徹底放棄 [{ticker} {name}]")
                 continue

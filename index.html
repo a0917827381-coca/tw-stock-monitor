@@ -48,7 +48,7 @@
             <select id="strictFilter" onchange="filterCards()">
                 <option value="all">🎯 所有型態判定條件</option>
                 <option value="strict">🔒 只看【標準嚴格】(兩腳誤差<5%)</option>
-                <option value="loose">🔥 只看【強勢寬鬆】(右腳墊高最多25%)</option>
+                <option value="loose">🔥 只看【強勢寬鬆】(破底與墊高皆容許25%)</option>
             </select>
             <select id="categoryFilter" onchange="filterCards()">
                 <option value="all">📁 所有產業分類</option>
@@ -69,25 +69,11 @@
 
         <div id="cardContainer">
             
-    <div class="card w-formed" data-status="formed" data-strictness="strict" data-category="傳統產業與其他" data-dividend="true" style="">
-        <div class="stock-title">1472-三洋實業 <span class="stock-category">傳統產業與其他</span><span class="strict-tag">🔒 標準嚴格</span> <span class="stock-category stock-div">💰 連3年配息</span></div>
-        <div class="price-info">
-            最新週收盤價：88.8<br>
-            關鍵頸線：84.97<br>
-            右腳支撐：84.5<br>
-            <span class="tag-formed">🚀 已成形 (已突破頸線)</span>
-        </div>
-        <div class="btn-group">
-            <a href="https://tw.tradingview.com/chart/?symbol=TWSE:1472" target="_blank" class="chart-btn">📊 TradingView K線</a>
-            <a href="https://tw.stock.yahoo.com/quote/1472" target="_blank" class="chart-btn yahoo">🟣 Yahoo 綜合資訊</a>
-        </div>
-    </div>
-    
-    <div class="card w-forming" data-status="forming" data-strictness="strict" data-category="傳統產業與其他" data-dividend="false" style="">
-        <div class="stock-title">1538-正峰 <span class="stock-category">傳統產業與其他</span><span class="strict-tag">🔒 標準嚴格</span></div>
+    <div class="card w-forming" data-status="forming" data-strictness="loose" data-category="傳統產業與其他" data-dividend="false" style="">
+        <div class="stock-title">1538-正峰 <span class="stock-category">傳統產業與其他</span><span class="loose-tag">🔥 強勢寬鬆</span></div>
         <div class="price-info">
             最新週收盤價：10.2<br>
-            關鍵頸線：10.25<br>
+            關鍵頸線：11.2<br>
             右腳支撐：10.0<br>
             <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
@@ -101,7 +87,7 @@
         <div class="stock-title">1583-程泰 <span class="stock-category">傳統產業與其他</span><span class="strict-tag">🔒 標準嚴格</span> <span class="stock-category stock-div">💰 連3年配息</span></div>
         <div class="price-info">
             最新週收盤價：49.0<br>
-            關鍵頸線：50.5<br>
+            關鍵頸線：60.0<br>
             右腳支撐：48.55<br>
             <span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>
         </div>
@@ -125,8 +111,8 @@
         </div>
     </div>
     
-    <div class="card w-forming" data-status="forming" data-strictness="strict" data-category="電子科技股" data-dividend="false" style="">
-        <div class="stock-title">2321-東訊 <span class="stock-category">電子科技股</span><span class="strict-tag">🔒 標準嚴格</span></div>
+    <div class="card w-forming" data-status="forming" data-strictness="loose" data-category="電子科技股" data-dividend="false" style="">
+        <div class="stock-title">2321-東訊 <span class="stock-category">電子科技股</span><span class="loose-tag">🔥 強勢寬鬆</span></div>
         <div class="price-info">
             最新週收盤價：15.3<br>
             關鍵頸線：16.45<br>
@@ -155,7 +141,7 @@
     
         </div>
         
-        <div class="footer">最後更新時間 (台灣時間)：2026-08-10 12:38:40</div>
+        <div class="footer">最後更新時間 (台灣時間)：2026-08-10 12:59:11</div>
     </div>
 
     <script>

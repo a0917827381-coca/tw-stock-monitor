@@ -50,7 +50,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
     <div class="container">
-        <h1>📈 台股「週K線」W底潛力股</h1>
+        <h1>📈 台股「週K線」W底潛力股 (實戰防禦版)</h1>
         
         <div class="filters">
             <input type="text" id="searchInput" placeholder="🔍 搜尋代碼或名稱" onkeyup="filterCards()">
@@ -178,7 +178,8 @@ def analyze_stock(ticker, stock_name):
     raw_code = ticker.replace('.TW', '')
     display_title = f"{raw_code}-{stock_name}"
     
-    if df.empty or len(df) < 20: # 確保有足夠長度的K線
+    # 確保有足夠長度的 K 線 (至少 30 週) 來尋找左腳
+    if df.empty or len(df) < 30: 
         return "" 
         
     is_dividend_3y = False
@@ -196,59 +197,61 @@ def analyze_stock(ticker, stock_name):
     prices = df['Close'].values
     current_price = round(prices[-1], 2)
     
-    # --- 新邏輯 1：不看未來，直接抓最近 8 週內的絕對最低點當作右腳 ---
-    recent_8_weeks = prices[-8:]
-    right_foot_local_idx = np.argmin(recent_8_weeks)
-    last_low_idx = len(prices) - 8 + right_foot_local_idx
-    last_low = prices[last_low_idx]
+    # ---------------- 核心邏輯重構 ----------------
     
-    # 尋找左腳 (從過去的 V 型低點中尋找)
-    local_min_idx = argrelextrema(prices, np.less, order=1)[0]
-    prev_low_idx = None
+    # 1. 定義右腳：最近 8 週內的絕對最低點
+    right_window = prices[-8:]
+    right_foot_local_idx = np.argmin(right_window)
+    right_low_idx = len(prices) - 8 + right_foot_local_idx
+    right_low = prices[right_low_idx]
     
-    # 條件 2：往回找相隔至少 4 週的左腳
-    for idx in reversed(local_min_idx):
-        if (last_low_idx - idx) >= 4:
-            prev_low_idx = idx
-            break
-            
-    # 找不到符合時間跨度的左腳，代表尚未打底完成
-    if prev_low_idx is None:
+    # 🛡️ 盲區二防護：防死魚機制 (現價必須比右腳最低點高出至少 3%)
+    # 如果還趴在地上不動，直接過濾掉
+    if current_price < right_low * 1.03:
         return ""
         
-    prev_low = prices[prev_low_idx]
+    # 2. 定義左腳：過去 8 週到 30 週之間的大谷底 (過濾遠古歷史與微小雜訊)
+    left_window_start = len(prices) - 30
+    left_window_end = len(prices) - 8
+    left_window = prices[left_window_start:left_window_end]
+    left_foot_local_idx = np.argmin(left_window)
+    left_low_idx = left_window_start + left_foot_local_idx
+    left_low = prices[left_low_idx]
     
-    # --- 新邏輯 2：降低頸線，只抓兩腳之間「最靠近右腳的那次反彈高點」 ---
-    between_prices = prices[prev_low_idx:last_low_idx]
-    neckline = 0
-    if len(between_prices) > 0:
-        local_max_idx = argrelextrema(between_prices, np.greater, order=1)[0]
-        if len(local_max_idx) > 0:
-            # 抓取最後一個出現的高點 (最靠近右腳的反彈壓制點)
-            neckline = between_prices[local_max_idx[-1]]
-        else:
-            # 如果期間連反彈都沒有，只好抓這段的最高價
-            neckline = np.max(between_prices)
-            
-    diff_ratio = (last_low - prev_low) / prev_low
-    strictness = "none"
+    # 3. 計算落差比例與死線防護
+    diff_ratio = (right_low - left_low) / left_low
     
-    # 容忍破底與墊高皆至 25%
+    # 🛡️ 盲區二防護：絕對死線 (跌幅超過 25% 的無底洞直接放棄)
+    if diff_ratio < -0.25 or diff_ratio > 0.25:
+        return ""
+        
     if -0.05 <= diff_ratio <= 0.05:
         strictness = "strict"
-    elif -0.25 <= diff_ratio <= 0.25:
+    else:
         strictness = "loose"
         
+    # 4. 定義頸線：兩腳之間「最靠近右腳」的實質反彈高點
+    between_prices = prices[left_low_idx:right_low_idx]
+    if len(between_prices) == 0:
+        return ""
+        
+    local_max_idx = argrelextrema(between_prices, np.greater, order=1)[0]
+    if len(local_max_idx) > 0:
+        neckline = between_prices[local_max_idx[-1]] # 取最後一個反彈高點
+    else:
+        neckline = np.max(between_prices)
+        
+    # 5. 狀態判定
     is_formed = False
     is_forming = False
-        
-    if strictness != "none":
-        if neckline > 0 and current_price > neckline:
-            is_formed = True
-        elif current_price > last_low: 
-            # 只要現價大於最低點，且確認有微幅反彈，就列入快成形
-            is_forming = True
+    
+    if current_price > neckline:
+        is_formed = True
+    else:
+        # 只要能走到這一步，且沒有突破頸線，就是完美的快成形
+        is_forming = True
 
+    # ---------------- HTML 生成 ----------------
     if is_formed:
         status_class = "w-formed"
         data_status = "formed"
@@ -256,7 +259,7 @@ def analyze_stock(ticker, stock_name):
     elif is_forming:
         status_class = "w-forming"
         data_status = "forming"
-        tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳剛反彈)</span>'
+        tag_html = '<span class="tag-forming">⚠️ 快成形 (右腳已強勢反彈)</span>'
     else:
         return "" 
 
@@ -275,8 +278,8 @@ def analyze_stock(ticker, stock_name):
         <div class="stock-title">{display_title} <span class="stock-category">{category}</span>{strict_html}{div_tag_html}</div>
         <div class="price-info">
             最新週收盤價：{current_price}<br>
-            關鍵頸線：{round(neckline, 2) if neckline > 0 else '無'}<br>
-            右腳支撐：{round(last_low, 2)}<br>
+            關鍵頸線：{round(neckline, 2)}<br>
+            右腳支撐：{round(last_low, 2) if 'last_low' in locals() else round(right_low, 2)}<br>
             {tag_html}
         </div>
         <div class="btn-group">

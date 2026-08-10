@@ -227,7 +227,7 @@ def analyze_stock(ticker, stock_name):
         if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
         # 允許跌破 5% 內，但右腳墊高最高至 25% 皆視為「寬鬆」
-        elif -0.05 <= diff_ratio <= 0.25:
+        elif -0.15 <= diff_ratio <= 0.25:
             strictness = "loose"
             
         if strictness != "none":

@@ -173,6 +173,8 @@ def get_category(ticker):
 def analyze_stock(ticker, stock_name):
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y", interval="1wk", auto_adjust=True)
+    # 🧹 加上這行：剔除所有缺少收盤價的「空包彈」髒資料
+    df = df.dropna(subset=['Close'])
     
     category = get_category(ticker)
     raw_code = ticker.replace('.TW', '')

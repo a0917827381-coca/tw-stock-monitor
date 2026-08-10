@@ -225,7 +225,7 @@ def analyze_stock(ticker, stock_name):
         if -0.05 <= diff_ratio <= 0.05:
             strictness = "strict"
         # ⚠️ 這裡保留了你上一回合針對「晶豪科」破底翻修正的 -0.15 寬鬆標準
-        elif -0.15 <= diff_ratio <= 0.25:
+        elif -0.25 <= diff_ratio <= 0.25:
             strictness = "loose"
             
         if strictness != "none":

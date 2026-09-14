@@ -140,6 +140,7 @@ HTML_TEMPLATE = """
     }
     
     window.onload = filterCards;
+    filterCards(); // 就算 window.onload 被插件阻擋，也主動立即執行一次
     </script>
 </body>
 </html>
@@ -293,10 +294,11 @@ if __name__ == '__main__':
     all_cards = ""
     failed_items = [] 
     
-    print(f"🚀 啟動多執行緒加速掃描，共 {len(watch_items)} 檔...")
+    print(f"🚀 啟動掃描，共 {len(watch_items)} 檔...")
     start_time = time.time()
     
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    # 降低線程到 3，避免觸發 Yahoo IP 封鎖 (HTTP 429)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         future_to_ticker = {executor.submit(analyze_stock, ticker, name): (ticker, name) for ticker, name in watch_items}
         
         for future in concurrent.futures.as_completed(future_to_ticker):
@@ -309,23 +311,35 @@ if __name__ == '__main__':
                 failed_items.append((ticker, name))
 
     if failed_items:
-        print(f"\n⚠️ 第一階段有 {len(failed_items)} 檔下載失敗，暫停 5 秒後進入單線程補考...")
-        time.sleep(5) 
+        print(f"\n⚠️ 第一階段有 {len(failed_items)} 檔下載失敗，暫停 10 秒後補考...")
+        time.sleep(10) 
         
         for ticker, name in failed_items:
             try:
                 card = analyze_stock(ticker, name)
                 if card:
                     all_cards += card
-                time.sleep(1.0) 
+                time.sleep(1.5) 
             except Exception as e:
-                print(f"❌ 補救失敗，徹底放棄 [{ticker} {name}]")
+                print(f"❌ 補救失敗，跳過 [{ticker} {name}]")
                 continue
+
+    # 🛡️ 空狀態防護：若本週完全沒有股票符合條件，不要留下空白
+    if not all_cards.strip():
+        all_cards = """
+        <div class="card w-none" data-status="none" data-strictness="all" data-category="all" data-dividend="false" style="text-align: center; padding: 25px;">
+            <div class="stock-title" style="color: #666;">☕ 本週無符合條件之標的</div>
+            <div class="price-info">所有股票目前皆未達「W底」型態標準，或正處於區間震盪整理。</div>
+        </div>
+        """
 
     end_time = time.time()
     minutes, seconds = divmod(end_time - start_time, 60)
     
-    tw_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+    # 修正時區計算（建議使用 timezone 避免日後棄用警告）
+    tw_tz = datetime.timezone(datetime.timedelta(hours=8))
+    tw_time = datetime.datetime.now(tw_tz).strftime('%Y-%m-%d %H:%M:%S')
+    
     final_html = HTML_TEMPLATE.replace('{cards_html}', all_cards).replace('{update_time}', tw_time)
     
     with open('index.html', 'w', encoding='utf-8') as f:
